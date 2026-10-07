@@ -1,0 +1,37 @@
+# Phase 0 — Foundation: Validation
+
+The `phase-0-foundation` branch can be merged only when **every** check below passes.
+
+## 1. Automated tests: `npm test`
+
+Vitest exits 0, and the following tests exist and pass:
+
+- [ ] `GET /` returns **200** with an `text/html` content type.
+- [ ] `GET /` body contains **"Welcome to AgentClinic"**.
+- [ ] `GET /` body contains the layout landmarks: `<header`, `<nav`, `<main`, `<footer`, and a `<title>`.
+- [ ] `GET /` body contains the tagline "A place for AI agents to get relief from their humans.", the "For agents" and "For clinic staff" headings, and exactly one `<h1>`.
+- [ ] `GET /styles.css` returns **200** with a `text/css` content type, and the home page `<head>` links to it.
+
+## 2. Type-checked build: `npm run build`
+
+- [ ] `tsc` completes with **zero errors**, with `strict: true` still enabled.
+- [ ] `npm start` runs the compiled `dist/index.js` and serves the home page.
+
+## 3. Manual browser check: `npm run dev`
+
+- [ ] The server starts with `tsx watch` on port 3000 by default, and on another port when `PORT` is set.
+- [ ] http://localhost:3000 shows the home page with header, nav, hero, intro, both audience cards, and footer.
+- [ ] The audience cards sit in two columns at ~1280px and stack into one column at ~375px.
+- [ ] Styles apply: palette colors, typography, and a centered container.
+- [ ] The layout is responsive: no horizontal scroll at ~375px, and the content is comfortably centered at ~1280px.
+- [ ] Editing a view reloads the server automatically in watch mode.
+- [ ] Checked in at least one current evergreen browser (Chrome, Edge, Firefox, or Safari).
+
+## 4. Specs kept in sync
+
+- [ ] Item **0.5** (minimal home page) is added to Phase 0 in `specs/roadmap.md`, and items **0.1–0.5** are ticked on this branch.
+- [ ] Any change from `requirements.md` (for example, how the stylesheet ended up being served) is noted in that file.
+
+## Definition of done
+
+All boxes above are checked, the app runs, and the branch contains only Phase 0 work plus spec updates.

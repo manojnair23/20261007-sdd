@@ -15,6 +15,29 @@
 | Dev runner | `tsx` (watch mode) | Run TypeScript directly during development |
 | Build | `tsc` | Already configured in the repo |
 
+## Server-side TypeScript
+
+All application logic runs on the server in TypeScript. Pages are rendered on the server and sent as HTML; the browser receives little or no JavaScript.
+
+### Framework recommendation: Hono
+
+We recommend **Hono** as the web framework:
+
+- **TypeScript-first:** typed routes, params, and context out of the box.
+- **Built-in JSX:** server-side rendering of typed components without React or a bundler.
+- **Small and fast:** few dependencies, quick startup, easy to understand in a demo.
+- **Popular and portable:** widely adopted; runs on Node today and on other runtimes (Bun, Deno, edge) if needed later.
+- **Easy to test:** `app.request()` lets Vitest exercise routes without starting a server.
+
+### Alternatives considered
+
+| Framework | Why not (for now) |
+|---|---|
+| Express | Very popular, but TypeScript types are bolted on and it lacks built-in rendering |
+| Fastify | Strong and fast, but more ceremony (plugins, schemas) than this app needs |
+| Next.js | Powerful, but brings React, a client bundle, and more complexity than a server-rendered app needs |
+| NestJS | Enterprise-style structure; too heavy for small, incremental phases |
+
 ## Conventions
 
 - Source lives in `src/`; tests live alongside code as `*.test.ts`.
