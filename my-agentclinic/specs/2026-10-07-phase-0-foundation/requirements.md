@@ -46,3 +46,10 @@ Roadmap items covered: **0.1, 0.2, 0.3, 0.4** in `specs/roadmap.md`, plus a new 
 - TypeScript `strict` stays on.
 - Keep dependencies to the minimum (principle 3, "Simple over clever").
 - The app must run after every task group (principle 1, "Small steps").
+
+## Implementation notes
+
+- **Stylesheet delivery (resolved):** `public/styles.css` is served at `/styles.css` with `serveStatic` from `@hono/node-server/serve-static` (root `./public`, resolved from the working directory, so run the npm scripts from the project root). There is no build step.
+- **Doctype:** `Layout` emits `<!doctype html>` with `raw()` from `hono/html`, because JSX escapes plain string children.
+- **tsconfig:** `target` was raised to `es2022`, and `*.test.ts(x)` files are excluded so `dist/` holds only app code. Vitest needed no `vitest.config.ts`, because it reads `jsxImportSource` from tsconfig.
+- **ESM-only dependencies:** `hono` and `@hono/node-server` v2 ship as ESM only. The CommonJS build still runs because Node 22+ supports `require()` of ESM, so Node 22 or later is required.
