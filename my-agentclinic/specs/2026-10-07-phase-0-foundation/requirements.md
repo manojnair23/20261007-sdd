@@ -53,3 +53,5 @@ Roadmap items covered: **0.1, 0.2, 0.3, 0.4** in `specs/roadmap.md`, plus a new 
 - **Doctype:** `Layout` emits `<!doctype html>` with `raw()` from `hono/html`, because JSX escapes plain string children.
 - **tsconfig:** `target` was raised to `es2022`, and `*.test.ts(x)` files are excluded so `dist/` holds only app code. Vitest needed no `vitest.config.ts`, because it reads `jsxImportSource` from tsconfig.
 - **ESM-only dependencies:** `hono` and `@hono/node-server` v2 ship as ESM only. The CommonJS build still runs because Node 22.12+ supports `require()` of ESM without a flag, so `engines.node` is `>=22.12` and `@types/node` is pinned to `^22` to match that floor.
+- **Type-checking tests:** `tsconfig.test.json` extends the build config, includes the test files, and emits nothing. `npm run typecheck` runs it, and `npm run build` runs `typecheck` before `tsc`, so type errors in tests fail the build.
+- **PORT parsing:** `src/port.ts` treats an unset or blank `PORT` as 3000, accepts integers 0–65535 (0 lets the OS pick a free port), and exits with an error for anything else instead of silently falling back.
