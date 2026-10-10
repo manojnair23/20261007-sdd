@@ -45,3 +45,17 @@ describe('GET /styles.css', () => {
     expect(await res.text()).toContain(':root')
   })
 })
+
+describe('GET /layout.css', () => {
+  it('returns 200 with a CSS content type', async () => {
+    const res = await app.request('/layout.css')
+    expect(res.status).toBe(200)
+    expect(res.headers.get('content-type')).toMatch(/text\/css/)
+    expect(await res.text()).toContain('.site-header')
+  })
+
+  it('is imported by the global stylesheet', async () => {
+    const css = await (await app.request('/styles.css')).text()
+    expect(css).toMatch(/@import url\("layout\.css"\);/)
+  })
+})

@@ -8,6 +8,7 @@ const publicDir = join(__dirname, '..', 'public')
 
 export const app = new Hono()
 
-app.use('/styles.css', serveStatic({ root: publicDir }))
+// Serve stylesheets and other assets from public/; unmatched requests fall through to the routes.
+app.use('*', serveStatic({ root: publicDir }))
 
 app.get('/', (c) => c.html(<HomePage />))

@@ -2,7 +2,7 @@
 
 ## Prompt 1
 
-Update specs/2026-03-30-hello-hono/plan.md and implementation of a main layout component with a header/main/footer as three subcomponents. Make a CSS file, import it, and link to it.
+Update specs/2026-10-07-phase-0-foundation/plan.md and implementation of a main layout component with a header/main/footer as three subcomponents. Make a CSS file, import it, and link to it.
 
 ## Prompt 2
 
