@@ -32,7 +32,8 @@ describe('GET /', () => {
 
   it('links the global stylesheet', async () => {
     const body = await (await app.request('/')).text()
-    expect(body).toContain('<link rel="stylesheet" href="/styles.css"/>')
+    const link = body.match(/<link\b[^>]*rel="stylesheet"[^>]*>/)?.[0]
+    expect(link).toMatch(/href="\/styles\.css"/)
   })
 })
 
