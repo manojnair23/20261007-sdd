@@ -2,7 +2,7 @@
 
 Very small phases, skeleton first. Each phase should be completable in one short session, leave the app running, and include tests.
 
-## Phase 0 — Foundation
+## Phase 0 — Foundation ✅ Complete
 - [x] **0.1** Add Hono + `tsx`; serve "Welcome to AgentClinic" at `/`.
 - [x] **0.2** Add Vitest with one test for the home route.
 - [x] **0.3** Base layout (header, nav, footer) using Hono JSX.
