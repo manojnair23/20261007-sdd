@@ -30,10 +30,19 @@ describe('GET /', () => {
     expect(body.match(/<h1[\s>]/g)).toHaveLength(1)
   })
 
-  it('links the global stylesheet', async () => {
+  it('links Pico, then the global stylesheet', async () => {
     const body = await (await app.request('/')).text()
-    const link = body.match(/<link\b[^>]*rel="stylesheet"[^>]*>/)?.[0]
-    expect(link).toMatch(/href="\/styles\.css"/)
+    const hrefs = [...body.matchAll(/<link\b[^>]*rel="stylesheet"[^>]*href="([^"]+)"/g)].map((m) => m[1])
+    expect(hrefs).toEqual(['/pico.min.css', '/styles.css'])
+  })
+})
+
+describe('GET /pico.min.css', () => {
+  it('serves PicoCSS from the installed package with a CSS content type', async () => {
+    const res = await app.request('/pico.min.css')
+    expect(res.status).toBe(200)
+    expect(res.headers.get('content-type')).toMatch(/text\/css/)
+    expect(await res.text()).toContain('Pico CSS')
   })
 })
 

@@ -5,7 +5,7 @@ export const Header = () => (
         AgentClinic
       </a>
       <nav aria-label="Main">
-        <ul class="nav-list">
+        <ul>
           <li>
             <a href="/">Home</a>
           </li>

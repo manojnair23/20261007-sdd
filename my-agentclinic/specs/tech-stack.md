@@ -9,7 +9,7 @@
 | Web framework | [Hono](https://hono.dev) | Small, fast, modern, first-class TypeScript |
 | Rendering | Server-side rendering with Hono JSX | No client framework needed; fast pages, simple mental model |
 | Database | SQLite via `better-sqlite3` | Zero-ops, file-based, perfect for a small app and demos |
-| Styling | Plain modern CSS (custom properties, grid, flexbox) | Attractive and responsive without a build-heavy toolchain |
+| Styling | [PicoCSS](https://picocss.com) v2 (served locally from npm) plus small custom CSS on Pico variables | Good semantic defaults for tables, forms, and cards; attractive and responsive without a build-heavy toolchain |
 | Interactivity | Progressive enhancement; minimal vanilla JS only where needed | Pages work without JS |
 | Testing / validation | Vitest | Fast, TypeScript-native; the gate for validating every change |
 | Dev runner | `tsx` (watch mode) | Run TypeScript directly during development |
@@ -43,7 +43,7 @@ We recommend **Hono** as the web framework:
 - Source lives in `src/`; tests live alongside code as `*.test.ts`.
 - Routes grouped by domain: `agents`, `ailments`, `therapies`, `appointments`, `dashboard`.
 - Database access goes through a small typed data layer; no raw SQL in route handlers.
-- Schema changes are applied by simple, ordered SQL migration files.
+- Schema changes are applied by simple, ordered SQL migration files in `migrations/` (`NNNN_description.sql`). Each file runs inside its own transaction, so it must not contain `BEGIN`/`COMMIT`.
 - Seed data is playful and lives in a seed script.
 
 ## Validation
@@ -58,6 +58,7 @@ Vitest tests are how we validate that a change works. A phase or feature is not 
 
 The web UI is responsive. Every feature spec must follow these rules, and a feature is not done until its pages meet them.
 
+- **PicoCSS base:** `Layout` links `/pico.min.css` (served from the installed package, never a CDN) before `/styles.css`, and pins `data-theme="light"`. Brand colors and fonts override Pico's `--pico-*` variables in `styles.css`; prefer semantic HTML Pico already styles over new classes. The rules below still apply on top of Pico.
 - **Mobile-first CSS:** base styles target phones; `@media (min-width: …)` queries add wider layouts.
 - **Breakpoints in `rem`:** the standard breakpoint is `40rem`. Add others only when a layout needs them.
 - **Fluid sizing:** use `clamp()` for type and spacing, and grid or flexbox for layout. No fixed widths that can cause horizontal scroll.

@@ -43,6 +43,11 @@ describe('Layout', () => {
     expect(html).toContain('<main class="container"><p>Body content</p></main>')
   })
 
+  it('pins the light theme', () => {
+    const html = render(<Layout title="Test page" />)
+    expect(html).toContain('<html lang="en" data-theme="light">')
+  })
+
   it('sets the viewport meta tag for responsive layouts', () => {
     const html = render(<Layout title="Test page" />)
     expect(html).toContain('<meta name="viewport" content="width=device-width, initial-scale=1"/>')
