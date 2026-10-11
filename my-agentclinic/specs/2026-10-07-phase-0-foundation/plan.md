@@ -61,7 +61,14 @@ Each group maps to one roadmap item. Group 5 adds a new item, 0.5. At the end of
    - `src/app.test.ts`: `GET /layout.css` returns 200 with `text/css`, and `styles.css` imports it.
 7. Check by hand that the home page looks unchanged.
 
-## 7. Wrap-up
+## 7. Responsive hardening (refines 0.3 and 0.4)
+
+1. In `public/styles.css`, give `body` `min-height: 100dvh` (after a `100vh` fallback) so mobile browser toolbars don't cause jumps, and `overflow-wrap: break-word` so long words can't overflow at ~320px.
+2. In `public/layout.css`, make nav links `inline-flex` with `min-height: 44px` and vertical centering so they are comfortable tap targets.
+3. Add a test in `src/views/Layout.test.tsx` that `Layout` renders the viewport meta tag (`width=device-width, initial-scale=1`).
+4. Check by hand at ~320px, ~375px, and ~1280px.
+
+## 8. Wrap-up
 
 1. Add item **0.5** "Minimal AgentClinic home page (hero, tagline, audience cards)" to Phase 0 in `specs/roadmap.md`, then tick 0.1–0.5.
 2. Run `npm run validate`, then everything else in `validation.md`, and confirm it passes.

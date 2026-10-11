@@ -12,6 +12,7 @@ The test files typecheck, Vitest exits 0, and the following tests exist and pass
 - [x] `Header`, `Main`, and `Footer` each render their landmark when tested on their own, and `Layout` renders them in that order with the page content inside `<main>`.
 - [x] `GET /` body contains the tagline "A place for AI agents to get relief from their humans.", the "For agents" and "For clinic staff" headings, and exactly one `<h1>`.
 - [x] `GET /styles.css` returns **200** with a `text/css` content type, and the home page `<head>` links to it.
+- [x] `Layout` renders the viewport meta tag `width=device-width, initial-scale=1`.
 
 ## 2. Type-checked build: `npm run build`
 
@@ -25,6 +26,8 @@ The test files typecheck, Vitest exits 0, and the following tests exist and pass
 - [x] The audience cards sit in two columns at ~1280px and stack into one column at ~375px.
 - [x] Styles apply: palette colors, typography, and a centered container.
 - [x] The layout is responsive: no horizontal scroll at ~375px, and the content is comfortably centered at ~1280px.
+- [ ] No horizontal scroll at ~320px, and long text wraps instead of overflowing.
+- [ ] Nav links are at least 44px tall.
 - [x] Editing a view reloads the server automatically in watch mode.
 - [x] Checked in at least one current evergreen browser (Chrome, Edge, Firefox, or Safari).
 

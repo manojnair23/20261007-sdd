@@ -49,6 +49,9 @@ main.container {
 }
 
 .nav-list a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   color: #fff;
   text-decoration: none;
 }

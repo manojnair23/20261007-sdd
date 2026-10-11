@@ -36,6 +36,7 @@ Roadmap items covered: **0.1, 0.2, 0.3, 0.4** in `specs/roadmap.md`, plus a new 
 | D6 | The nav shows only **Home** for now. | Links to later domains get added in the phase that builds each domain, so nothing links to a 404. |
 | D7 | The home page is **static content only**: no data, no forms, no links to unbuilt pages. Its tagline comes from `specs/mission.md`. | The site stays minimal and honest until Phases 2–6 add real features. |
 | D8 | **One file per layout part**: `Header`, `Main`, and `Footer` each live in their own file under `src/views/layout/` (`Header.tsx`, `Main.tsx`, `Footer.tsx`). `Layout.tsx` owns only the document shell (`<!doctype html>`, `<html>`, `<head>`) and composes the three. | Each part stays small and can be read, changed, and tested on its own. Later phases can grow the nav or footer without touching the shell. |
+| D9 | **Responsive, mobile-first UI**: base CSS targets phones and `@media (min-width: 40rem)` adds wider layouts. `Layout` sets the viewport meta tag, long text wraps, and nav links are at least 44px tall. | The product's web UI must be responsive (see `specs/mission.md` and the "Responsive design" section of `specs/tech-stack.md`). Phase 0 sets the pattern later phases follow. |
 
 ## Open decisions (resolve during implementation)
 
@@ -47,6 +48,7 @@ Roadmap items covered: **0.1, 0.2, 0.3, 0.4** in `specs/roadmap.md`, plus a new 
 - TypeScript `strict` stays on.
 - Keep dependencies to the minimum (principle 3, "Simple over clever").
 - The app must run after every task group (principle 1, "Small steps").
+- Every page is responsive from ~320px to ~1440px with no horizontal scroll (principle 5, "Responsive").
 
 ## Implementation notes
 

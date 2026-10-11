@@ -2,6 +2,8 @@
 
 Very small phases, skeleton first. Each phase should be completable in one short session, leave the app running, and include Vitest tests. A phase is complete only when `npm run validate` passes (see `specs/tech-stack.md`).
 
+Every page a phase adds must be responsive and pass the responsive checks in `specs/tech-stack.md` before the phase is complete.
+
 ## Phase 0 — Foundation ✅ Complete
 - [x] **0.1** Add Hono + `tsx`; serve "Welcome to AgentClinic" at `/`.
 - [x] **0.2** Add Vitest with one test for the home route.
@@ -42,4 +44,4 @@ Very small phases, skeleton first. Each phase should be completable in one short
 ## Phase 7 — Polish
 - [ ] **7.1** Visual polish and empty/error states.
 - [ ] **7.2** Accessibility pass (semantic HTML, contrast, keyboard nav).
-- [ ] **7.3** Responsive check across modern browsers.
+- [ ] **7.3** Cross-browser responsive review (each phase already checks its own pages).
