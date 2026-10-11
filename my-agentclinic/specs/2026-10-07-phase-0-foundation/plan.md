@@ -1,6 +1,6 @@
 # Phase 0 — Foundation: Plan
 
-Each group maps to one roadmap item. Group 5 adds a new item, 0.5. At the end of every group, `npm run dev` serves the app and `npm run build` passes. Once Vitest is installed in group 2, `npm test` must pass too.
+Each group maps to one roadmap item. Group 5 adds a new item, 0.5. At the end of every group, `npm run dev` serves the app and `npm run build` passes. Once Vitest is installed in group 2, `npm run validate` (typecheck plus the Vitest suite) must pass too.
 
 ## 1. Hono server with a welcome page (roadmap 0.1)
 
@@ -13,8 +13,8 @@ Each group maps to one roadmap item. Group 5 adds a new item, 0.5. At the end of
 
 ## 2. Vitest and the first test (roadmap 0.2)
 
-1. Install `vitest` as a dev dependency and add `"test": "vitest run"`. Optionally add `"test:watch": "vitest"`.
-2. Add a minimal `vitest.config.ts` only if Vitest needs the JSX import source set explicitly. Otherwise skip it.
+1. Install `vitest` as a dev dependency and add `"test": "vitest run"`, `"test:watch": "vitest"`, and `"validate": "npm run typecheck && npm test"`.
+2. Add a minimal `vitest.config.mts` only if Vitest needs the JSX import source set explicitly. Otherwise skip it.
 3. Create `src/app.test.ts`. It sends `app.request('/')` and asserts status 200, an HTML content type, and a body containing "Welcome to AgentClinic".
 4. Make sure the `tsc` build excludes test files (or tolerates them) so `dist/` stays clean.
 
@@ -55,13 +55,20 @@ Each group maps to one roadmap item. Group 5 adds a new item, 0.5. At the end of
 2. `Layout.tsx` keeps the document shell (`<!doctype html>`, `<html>`, `<head>`) and renders `<Header />`, `<Main>{children}</Main>`, and `<Footer />` in its `<body>`.
 3. Move the container, header, nav, and footer rules from `public/styles.css` into a new `public/layout.css`. Import it at the top of `styles.css` with `@import url("layout.css");`. `Layout` still links only `/styles.css`.
 4. Serve every file in `public/` (`serveStatic` on `*`), so `/layout.css` resolves. Requests that match no file fall through to the routes.
-5. Add `vitest.config.ts` that sets the Hono JSX import source, because `tsconfig.json` excludes test files and Vitest can't take JSX settings for `*.test.tsx` from it.
+5. Add `vitest.config.mts` that sets the Hono JSX import source, because `tsconfig.json` excludes test files and Vitest can't take JSX settings for `*.test.tsx` from it.
 6. Add tests:
    - `src/views/Layout.test.tsx`: each subcomponent renders its landmark, and `Layout` places header, main, and footer in order with the page content inside `<main>`;
    - `src/app.test.ts`: `GET /layout.css` returns 200 with `text/css`, and `styles.css` imports it.
 7. Check by hand that the home page looks unchanged.
 
-## 7. Wrap-up
+## 7. Responsive hardening (refines 0.3 and 0.4)
+
+1. In `public/styles.css`, give `body` `min-height: 100dvh` (after a `100vh` fallback) so mobile browser toolbars don't cause jumps, and `overflow-wrap: break-word` so long words can't overflow at ~320px.
+2. In `public/layout.css`, make nav links `inline-flex` with `min-height: 44px` and vertical centering so they are comfortable tap targets.
+3. Add a test in `src/views/Layout.test.tsx` that `Layout` renders the viewport meta tag (`width=device-width, initial-scale=1`).
+4. Check by hand at ~320px, ~375px, and ~1280px.
+
+## 8. Wrap-up
 
 1. Add item **0.5** "Minimal AgentClinic home page (hero, tagline, audience cards)" to Phase 0 in `specs/roadmap.md`, then tick 0.1–0.5.
-2. Run everything in `validation.md` and confirm it passes.
+2. Run `npm run validate`, then everything else in `validation.md`, and confirm it passes.

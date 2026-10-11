@@ -32,6 +32,7 @@ Playful and tongue-in-cheek, but the software itself is real and reliable. Jokes
 2. **Specs first.** Each phase starts from a short written spec before code.
 3. **Simple over clever.** Prefer fewer dependencies and server-rendered pages.
 4. **Tested.** Every phase adds tests for the behavior it introduces.
+5. **Responsive.** Every page works from phone (~320px) to wide desktop (~1440px) widths with no horizontal scroll. Layouts adapt to the screen instead of just shrinking.
 
 ## Out of scope (for now)
 

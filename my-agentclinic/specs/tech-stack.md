@@ -11,7 +11,7 @@
 | Database | SQLite via `better-sqlite3` | Zero-ops, file-based, perfect for a small app and demos |
 | Styling | Plain modern CSS (custom properties, grid, flexbox) | Attractive and responsive without a build-heavy toolchain |
 | Interactivity | Progressive enhancement; minimal vanilla JS only where needed | Pages work without JS |
-| Testing | Vitest | Fast, TypeScript-native |
+| Testing / validation | Vitest | Fast, TypeScript-native; the gate for validating every change |
 | Dev runner | `tsx` (watch mode) | Run TypeScript directly during development |
 | Build | `tsc` | Already configured in the repo |
 
@@ -45,6 +45,25 @@ We recommend **Hono** as the web framework:
 - Database access goes through a small typed data layer; no raw SQL in route handlers.
 - Schema changes are applied by simple, ordered SQL migration files.
 - Seed data is playful and lives in a seed script.
+
+## Validation
+
+Vitest tests are how we validate that a change works. A phase or feature is not done until its behaviour is covered by Vitest tests and they pass.
+
+- Run `npm run validate` to typecheck and then run the full Vitest suite once. This is the single command to run before review.
+- `npm test` runs the suite once without typechecking; `npm run test:watch` re-runs it on file changes during development.
+- Route behaviour is tested through `app.request()`, so validation needs no running server.
+
+## Responsive design
+
+The web UI is responsive. Every feature spec must follow these rules, and a feature is not done until its pages meet them.
+
+- **Mobile-first CSS:** base styles target phones; `@media (min-width: …)` queries add wider layouts.
+- **Breakpoints in `rem`:** the standard breakpoint is `40rem`. Add others only when a layout needs them.
+- **Fluid sizing:** use `clamp()` for type and spacing, and grid or flexbox for layout. No fixed widths that can cause horizontal scroll.
+- **Viewport:** every page renders through `Layout`, which sets `<meta name="viewport" content="width=device-width, initial-scale=1">`.
+- **Text and touch:** long text wraps instead of overflowing, and interactive controls (links in nav, buttons, form fields) are at least 44px tall.
+- **Validation:** Vitest checks the viewport meta tag. Each phase is also checked by hand at ~320px, ~375px, and ~1280px: no horizontal scroll, and the layout adapts.
 
 ## Browser support
 
