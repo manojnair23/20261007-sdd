@@ -46,15 +46,15 @@ Covered by `src/db/cli.test.ts`, which runs the real CLI with `DB_PATH` pointing
 
 ## 4. Manual browser check (PicoCSS)
 
-- [ ] The home page is styled by Pico with the brand palette: blue header bar, accent tagline, and primary-colored links. It does not fall back to Pico's default colors.
-- [ ] The audience cards sit in two columns at ~1280px and stack into one column at ~375px.
-- [ ] No horizontal scroll at ~320px, and long text wraps.
-- [ ] Nav links are at least 44px tall.
-- [ ] Tabbing shows a visible focus outline on every link: white on the blue header, dark blue on the page.
-- [ ] The tagline is the darker accent (`#b5462a`) and is easy to read.
-- [ ] The page stays light even when the OS is set to dark mode.
-- [ ] No request goes to a CDN (check the browser's Network tab); the page works offline.
-- [ ] Checked in at least one current evergreen browser.
+- [x] The home page is styled by Pico with the brand palette: blue header bar, accent tagline, and primary-colored links. It does not fall back to Pico's default colors.
+- [x] The audience cards sit in two columns at ~1280px and stack into one column at ~375px.
+- [x] No horizontal scroll at ~320px, and long text wraps.
+- [x] Nav links are at least 44px tall.
+- [x] Tabbing shows a visible focus outline on every link: white on the blue header, dark blue on the page.
+- [x] The tagline is the darker accent (`#b5462a`) and is easy to read.
+- [x] The page stays light even when the OS is set to dark mode.
+- [x] No request goes to a CDN (check the browser's Network tab); the page works offline.
+- [x] Checked in at least one current evergreen browser.
 
 ## 5. Specs kept in sync
 
