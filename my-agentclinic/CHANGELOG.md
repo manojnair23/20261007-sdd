@@ -3,6 +3,8 @@
 All notable changes to this project, newest first.
 
 ## 2026-10-11
+- Build Phase 1: SQLite via `better-sqlite3`, an ordered SQL migration runner (run on startup and by `npm run db:migrate`), a seed hook (`npm run db:seed`), and PicoCSS as the styling base with the brand palette on Pico variables
+- Write the Phase 1 (Data foundation) requirements, plan, and validation specs
 - Combine roadmap Phases 2–5 (Agents, Ailments, Therapies, Appointments) into a single Phase 2, and renumber Dashboard and Polish to Phases 3 and 4
 - Require responsive design in the mission, tech stack, roadmap, and Phase 0 specs; add 44px nav tap targets, wrapping for long words, and a viewport meta tag test
 - Add `npm run validate` (typecheck, then the Vitest suite) as the single check before review, and update the specs to use it

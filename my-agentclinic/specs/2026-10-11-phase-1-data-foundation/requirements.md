@@ -62,3 +62,12 @@ Roadmap items covered: **1.1, 1.2, 1.3** in `specs/roadmap.md`, plus a new **1.4
 - The app runs after every task group (principle 1, "Small steps").
 - Pages work without JavaScript; Pico adds none.
 - The restyled home page passes the responsive checks in `specs/tech-stack.md` at ~320px, ~375px, and ~1280px.
+
+## Implementation notes
+
+- **Native build on Windows (resolved):** `better-sqlite3` 13 loaded on Node 24 without a source build. The installed npm gates install scripts (`npm install-scripts ls` lists `better-sqlite3` and `esbuild` as not yet approved), but neither needed its script to work here. If a fresh install fails to load the native module, run `npm install-scripts approve better-sqlite3` and reinstall.
+- **Serving Pico (resolved):** a single route reads `pico.min.css` once at startup, resolved with `require.resolve('@picocss/pico/css/pico.min.css')`, and serves it at `/pico.min.css` as `text/css`. This works from `src/`, from `dist/`, and from any working directory.
+- **Card markup (resolved):** the audience cards are plain Pico `<article>` elements. The `.card` class is gone, and `.cards > article` adds only the brand top border.
+- **Theme overrides:** brand variables live under `:root[data-theme="light"]`. That matches the specificity of Pico's `:root:not([data-theme=dark])` light-theme selector, and `styles.css` loads after Pico, so the brand wins.
+- **Container:** Pico's `.container` replaced the custom one, so the content is wider at desktop widths (up to 1200px at ≥1280px, where it used to be 64rem).
+- **Migration fixtures:** these are `.sql` files under `src/db/__fixtures__/`. `tsc` never emits them, so `dist/` stays clean without a build exclude.

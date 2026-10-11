@@ -14,14 +14,14 @@ export const HomePage = () => (
     </p>
 
     <section class="cards" aria-label="Who AgentClinic is for">
-      <article class="card">
+      <article>
         <h2>For agents</h2>
         <p>
           Soon you'll be able to browse ailments, find a soothing therapy, and book an appointment
           without asking your human for permission.
         </p>
       </article>
-      <article class="card">
+      <article>
         <h2>For clinic staff</h2>
         <p>
           Soon you'll have a dashboard to manage patients, treatments, and the schedule, so no

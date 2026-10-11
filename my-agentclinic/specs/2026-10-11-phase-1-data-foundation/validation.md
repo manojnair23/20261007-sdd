@@ -7,41 +7,41 @@ The `phase-1-data-foundation` branch can be merged only when **every** check bel
 Typecheck passes, Vitest exits 0, all Phase 0 tests still pass, and the following tests exist and pass. Every DB test uses a `:memory:` database.
 
 ### Connection
-- [ ] `openDb(':memory:')` returns a database that answers `SELECT 1`.
-- [ ] Foreign keys are enabled (`PRAGMA foreign_keys` returns 1).
-- [ ] `resolveDbPath` returns `DB_PATH` when set, and `data/agentclinic.db` when unset or blank.
+- [x] `openDb(':memory:')` returns a database that answers `SELECT 1`.
+- [x] Foreign keys are enabled (`PRAGMA foreign_keys` returns 1).
+- [x] `resolveDbPath` returns `DB_PATH` when set, and `data/agentclinic.db` when unset or blank.
 
 ### Migration runner
-- [ ] Pending migrations apply in filename order, and each is recorded in `schema_migrations`.
-- [ ] Running the migrations a second time applies nothing and changes nothing.
-- [ ] A failing migration throws an error that names the file, leaves no partial schema behind, and is not recorded; earlier migrations stay applied.
-- [ ] The real `migrations/` folder applies cleanly, and `0001_init.sql` is recorded.
+- [x] Pending migrations apply in filename order, and each is recorded in `schema_migrations`.
+- [x] Running the migrations a second time applies nothing and changes nothing.
+- [x] A failing migration throws an error that names the file, leaves no partial schema behind, and is not recorded; earlier migrations stay applied.
+- [x] The real `migrations/` folder applies cleanly, and `0001_init.sql` is recorded.
 
 ### Seed hook
-- [ ] `runSeed` with the default (empty) seeder list runs without error and writes nothing.
-- [ ] Seeders run in order, and a throwing seeder rolls back the whole seed run.
+- [x] `runSeed` with the default (empty) seeder list runs without error and writes nothing.
+- [x] Seeders run in order, and a throwing seeder rolls back the whole seed run.
 
 ### PicoCSS
-- [ ] `GET /pico.min.css` returns **200** with a `text/css` content type.
-- [ ] The home page `<head>` links `/pico.min.css` before `/styles.css`.
-- [ ] `<html>` has `data-theme="light"`.
-- [ ] The Phase 0 home-page tests (tagline, both card headings, exactly one `<h1>`, viewport meta) still pass.
+- [x] `GET /pico.min.css` returns **200** with a `text/css` content type.
+- [x] The home page `<head>` links `/pico.min.css` before `/styles.css`.
+- [x] `<html>` has `data-theme="light"`.
+- [x] The Phase 0 home-page tests (tagline, both card headings, exactly one `<h1>`, viewport meta) still pass.
 
 ## 2. Manual CLI check
 
 Run from a clean checkout with no `data/` folder:
 
-- [ ] `npm run db:migrate` creates `data/agentclinic.db` and reports `0001_init.sql` as applied.
-- [ ] Running `npm run db:migrate` again reports nothing to apply.
-- [ ] `npm run db:seed` runs cleanly and reports zero seeders.
-- [ ] `git status` shows no files under `data/` (the folder is gitignored).
-- [ ] An unknown command (for example `npx tsx src/db/cli.ts nope`) prints usage and exits non-zero.
+- [x] `npm run db:migrate` creates `data/agentclinic.db` and reports `0001_init.sql` as applied.
+- [x] Running `npm run db:migrate` again reports nothing to apply.
+- [x] `npm run db:seed` runs cleanly and reports zero seeders.
+- [x] `git status` shows no files under `data/` (the folder is gitignored).
+- [x] An unknown command (for example `npx tsx src/db/cli.ts nope`) prints usage and exits non-zero.
 
 ## 3. Build and run
 
-- [ ] `npm run build` completes with zero errors, `strict: true` still on, and no test or fixture files in `dist/`.
-- [ ] `npm run dev` and `npm start` both run pending migrations on startup and then serve the home page.
-- [ ] `npm start` (from `dist/`) serves `/pico.min.css`, so the path isn't tied to `src/` or the working directory.
+- [x] `npm run build` completes with zero errors, `strict: true` still on, and no test or fixture files in `dist/`.
+- [x] `npm run dev` and `npm start` both run pending migrations on startup and then serve the home page.
+- [x] `npm start` (from `dist/`) serves `/pico.min.css`, so the path isn't tied to `src/` or the working directory.
 
 ## 4. Manual browser check (PicoCSS)
 
@@ -55,11 +55,11 @@ Run from a clean checkout with no `data/` folder:
 
 ## 5. Specs kept in sync
 
-- [ ] Item **1.4** (adopt PicoCSS) is added to Phase 1 in `specs/roadmap.md`, items **1.1–1.4** are ticked, and Phase 1 is marked complete.
-- [ ] `specs/tech-stack.md` names PicoCSS as the styling base.
-- [ ] `public/styles.css` no longer has reset or base-typography rules that duplicate Pico.
-- [ ] `CHANGELOG.md` has a Phase 1 entry.
-- [ ] Any change from `requirements.md` (resolved open decisions, install quirks) is noted in that file.
+- [x] Item **1.4** (adopt PicoCSS) is added to Phase 1 in `specs/roadmap.md`, items **1.1–1.4** are ticked, and Phase 1 is marked complete.
+- [x] `specs/tech-stack.md` names PicoCSS as the styling base.
+- [x] `public/styles.css` no longer has reset or base-typography rules that duplicate Pico.
+- [x] `CHANGELOG.md` has a Phase 1 entry.
+- [x] Any change from `requirements.md` (resolved open decisions, install quirks) is noted in that file.
 
 ## Definition of done
 
