@@ -8,8 +8,9 @@
     "skipLibCheck": true,
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx",
-    "outDir": "dist"
+    "rootDir": "src",
+    "outDir": "dist",
+    "noEmit": true
   },
-  "include": ["src"],
-  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx"]
+  "include": ["src"]
 }
