@@ -9,7 +9,8 @@
     "start": "node dist/index.js",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc -p tsconfig.test.json"
+    "typecheck": "tsc -p tsconfig.test.json",
+    "validate": "npm run typecheck && npm test"
   },
   "dependencies": {
     "@hono/node-server": "^2.1.3",
