@@ -26,8 +26,8 @@ The test files typecheck, Vitest exits 0, and the following tests exist and pass
 - [x] The audience cards sit in two columns at ~1280px and stack into one column at ~375px.
 - [x] Styles apply: palette colors, typography, and a centered container.
 - [x] The layout is responsive: no horizontal scroll at ~375px, and the content is comfortably centered at ~1280px.
-- [ ] No horizontal scroll at ~320px, and long text wraps instead of overflowing.
-- [ ] Nav links are at least 44px tall.
+- [x] No horizontal scroll at ~320px, and long text wraps instead of overflowing.
+- [x] Nav links are at least 44px tall.
 - [x] Editing a view reloads the server automatically in watch mode.
 - [x] Checked in at least one current evergreen browser (Chrome, Edge, Firefox, or Safari).
 
