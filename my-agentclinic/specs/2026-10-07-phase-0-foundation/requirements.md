@@ -15,7 +15,7 @@ Roadmap items covered: **0.1, 0.2, 0.3, 0.4** in `specs/roadmap.md`, plus a new 
 3. **Base layout (0.3)**: a shared Hono JSX `Layout` component with a header (site name), a nav, a `<main>` content slot, and a footer. The header, main, and footer are separate subcomponents, each in its own file (see D8). The home page renders through it.
 4. **Global stylesheet (0.4)**: plain modern CSS with custom properties for colors and typography, plus a centered responsive container that works at phone and desktop widths.
 5. **Minimal home page (0.5)**: a `HomePage` view with a hero (welcome heading plus the mission tagline), a short playful intro, and two audience cards ("For agents", "For clinic staff"). The cards describe what is coming but don't link anywhere yet.
-6. **npm scripts**: `dev` (tsx watch), `start`, `test` (vitest run), and `build` (tsc).
+6. **npm scripts**: `dev` (tsx watch), `start`, `test` (vitest run), `test:watch` (vitest), `typecheck`, `validate` (typecheck then test), and `build` (typecheck then tsc).
 
 ### Out of scope
 
@@ -52,7 +52,7 @@ Roadmap items covered: **0.1, 0.2, 0.3, 0.4** in `specs/roadmap.md`, plus a new 
 
 - **Stylesheet delivery (resolved):** every file in `public/` is served with `serveStatic` from `@hono/node-server/serve-static` (root resolved from the module's `__dirname`, so the server finds `public/` from any working directory). `Layout` links `/styles.css`, which pulls in `layout.css` (container, header, nav, and footer rules) with `@import`. There is no build step.
 - **Doctype:** `Layout` emits `<!doctype html>` with `raw()` from `hono/html`, because JSX escapes plain string children.
-- **tsconfig:** `target` was raised to `es2022`, and `*.test.ts(x)` files are excluded so `dist/` holds only app code. A minimal `vitest.config.ts` sets the Hono JSX import source, because Vitest can't take JSX settings from tsconfig for the excluded `*.test.tsx` files.
+- **tsconfig:** `target` was raised to `es2022`, and `*.test.ts(x)` files are excluded so `dist/` holds only app code. A minimal `vitest.config.mts` sets the Hono JSX import source, because Vitest can't take JSX settings from tsconfig for the excluded `*.test.tsx` files. It uses the `.mts` extension so Vite loads it as ESM; as `.ts` in this CommonJS package, Vite warned that ESM syntax was being loaded as CommonJS.
 - **ESM-only dependencies:** `hono` and `@hono/node-server` v2 ship as ESM only. The CommonJS build still runs because Node 22.12+ supports `require()` of ESM without a flag, so `engines.node` is `>=22.12` and `@types/node` is pinned to `^22` to match that floor.
-- **Type-checking tests:** `tsconfig.test.json` extends the build config, includes the test files, and emits nothing. `npm run typecheck` runs it, and `npm run build` runs `typecheck` before `tsc`, so type errors in tests fail the build.
+- **Type-checking tests:** `tsconfig.test.json` extends the build config, includes the test files, and emits nothing. `npm run typecheck` runs it, and `npm run build` runs `typecheck` before `tsc`, so type errors in tests fail the build. `npm run validate` runs `typecheck` and then the Vitest suite; it is the single check to run before review.
 - **PORT parsing:** `src/port.ts` treats an unset or blank `PORT` as 3000, accepts integers 0–65535 (0 lets the OS pick a free port), and exits with an error for anything else instead of silently falling back.

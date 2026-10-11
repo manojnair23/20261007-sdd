@@ -2,9 +2,9 @@
 
 The `phase-0-foundation` branch can be merged only when **every** check below passes.
 
-## 1. Automated tests: `npm test`
+## 1. Automated tests: `npm run validate`
 
-Vitest exits 0, and the following tests exist and pass:
+The test files typecheck, Vitest exits 0, and the following tests exist and pass:
 
 - [x] `GET /` returns **200** with an `text/html` content type.
 - [x] `GET /` body contains **"Welcome to AgentClinic"**.

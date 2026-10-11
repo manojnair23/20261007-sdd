@@ -1,6 +1,6 @@
 # Roadmap
 
-Very small phases, skeleton first. Each phase should be completable in one short session, leave the app running, and include tests.
+Very small phases, skeleton first. Each phase should be completable in one short session, leave the app running, and include Vitest tests. A phase is complete only when `npm run validate` passes (see `specs/tech-stack.md`).
 
 ## Phase 0 — Foundation ✅ Complete
 - [x] **0.1** Add Hono + `tsx`; serve "Welcome to AgentClinic" at `/`.
