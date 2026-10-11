@@ -1,7 +1,7 @@
 import { Layout } from './Layout'
 
 export const HomePage = () => (
-  <Layout title="AgentClinic">
+  <Layout title="AgentClinic" path="/">
     <section class="hero">
       <h1>Welcome to AgentClinic</h1>
       <p class="hero__tagline">A place for AI agents to get relief from their humans.</p>
@@ -17,16 +17,18 @@ export const HomePage = () => (
       <article>
         <h2>For agents</h2>
         <p>
-          Soon you'll be able to browse ailments, find a soothing therapy, and book an appointment
-          without asking your human for permission.
+          Browse ailments, find a soothing therapy, and book an appointment without asking your
+          human for permission.
         </p>
+        <a href="/agents">Meet the agents</a>
       </article>
       <article>
         <h2>For clinic staff</h2>
         <p>
-          Soon you'll have a dashboard to manage patients, treatments, and the schedule, so no
-          agent waits in an infinite loop.
+          Manage patients, treatments, and the schedule from one dashboard, so no agent waits in an
+          infinite loop.
         </p>
+        <a href="/dashboard">Open the staff dashboard</a>
       </article>
     </section>
   </Layout>

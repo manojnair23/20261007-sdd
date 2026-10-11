@@ -1,14 +1,20 @@
 import type { Db } from './connection'
+import { resetDemo, seedAppointments, seedCatalog } from './seedData'
 
-export type Seeder = (db: Db) => void
+export type Seeder = (db: Db, now: Date) => void
 
-// Empty for now; Phase 2 adds the playful agents, ailments, and therapies.
-export const seeders: Seeder[] = []
+// Seeding resets the demo: clear every domain table, then insert the playful data.
+export const seeders: Seeder[] = [resetDemo, seedCatalog, seedAppointments]
+
+type SeedOptions = {
+  now?: Date
+  list?: Seeder[]
+}
 
 /** Runs each seeder in order inside one transaction. Returns how many ran. */
-export function runSeed(db: Db, list: Seeder[] = seeders): number {
+export function runSeed(db: Db, { now = new Date(), list = seeders }: SeedOptions = {}): number {
   db.transaction(() => {
-    for (const seed of list) seed(db)
+    for (const seed of list) seed(db, now)
   })()
   return list.length
 }

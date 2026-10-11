@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { Layout } from './Layout'
 import { Footer } from './layout/Footer'
-import { Header } from './layout/Header'
+import { currentFor, Header } from './layout/Header'
 import { Main } from './layout/Main'
 
 const render = (node: unknown) => String(node)
@@ -15,13 +15,22 @@ describe('layout subcomponents', () => {
   })
 
   it('Main wraps its children in a container', () => {
-    expect(render(<Main><p>Hello</p></Main>)).toBe('<main class="container"><p>Hello</p></main>')
+    expect(render(<Main><p>Hello</p></Main>)).toBe('<main id="main" class="container" tabindex="-1"><p>Hello</p></main>')
   })
 
   it('Footer renders the footer line', () => {
     const html = render(<Footer />)
     expect(html).toMatch(/^<footer class="site-footer">/)
     expect(html).toContain('No agents were over-prompted')
+  })
+})
+
+describe('currentFor', () => {
+  it('marks exact matches as the page and sub-pages as the section', () => {
+    expect(currentFor('/agents', '/agents')).toBe('page')
+    expect(currentFor('/agents', '/agents/3/dashboard')).toBe('true')
+    expect(currentFor('/', '/agents')).toBeUndefined()
+    expect(currentFor('/agents', '/agentsx')).toBeUndefined()
   })
 })
 
@@ -40,7 +49,17 @@ describe('Layout', () => {
     expect(header).toBeGreaterThan(-1)
     expect(main).toBeGreaterThan(header)
     expect(footer).toBeGreaterThan(main)
-    expect(html).toContain('<main class="container"><p>Body content</p></main>')
+    expect(html).toContain('<main id="main" class="container" tabindex="-1"><p>Body content</p></main>')
+  })
+
+  it('starts the body with a skip link to main', () => {
+    const html = render(<Layout title="Test page" />)
+    expect(html).toContain('<body><a class="skip-link" href="#main">Skip to content</a><header')
+  })
+
+  it('passes the path to the header so the current link is marked', () => {
+    const html = render(<Layout title="Test page" path="/ailments" />)
+    expect(html).toContain('<a href="/ailments" aria-current="page">Ailments</a>')
   })
 
   it('pins the light theme', () => {

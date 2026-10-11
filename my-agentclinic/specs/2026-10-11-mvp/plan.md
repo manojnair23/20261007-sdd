@@ -127,7 +127,15 @@ The plan is built from vertical slices. Every group from 2 to 8 adds its own mig
 4. Visual polish: consistent page headers, spacing, and the table and card styles on Pico variables. Keep custom CSS small.
 5. Cross-browser responsive review: every page at ~320px, ~375px, and ~1280px in Chrome or Edge plus Firefox, and in Safari if one is available.
 
-## 10. Wrap-up
+## 10. Spec clarifications (added after implementation)
+
+1. **Seed guard (D10).** In `src/db/cli.ts`, `seed` checks for existing appointments. If any exist and `--force` was not passed, it prints "The clinic has N appointment(s). Re-run with --force to wipe them and reload the demo data." and exits 1 without changing anything. Pass `--force` through the npm script with `npm run db:seed -- --force`.
+2. Extend `src/db/cli.test.ts`: seeding a database with appointments fails without `--force` and leaves the rows untouched; with `--force` it resets. Seeding an empty database needs no flag.
+3. Add tests that pin the clarified rules: a weekend booking within hours is accepted; two agents can book the same therapy at the same time; an in-progress appointment is listed as past and returns 409 for cancel and reschedule.
+4. Document `--force` and `TZ` in `README.md`.
+5. The other clarifications (D6 clinic time zone, D7 opening days, capacity, and the upcoming/past boundary, D15 recommendations without JS, and the mission scope) describe how the code already behaves; they need no code change.
+
+## 11. Wrap-up
 
 1. Tick 2.1–2.13, 3.1–3.2, and 4.1–4.3 in `specs/roadmap.md`, and mark Phases 2–4 complete.
 2. Update `README.md` with setup steps, the scripts (`dev`, `validate`, `db:migrate`, `db:seed`), `PORT` and `DB_PATH`, and a 60-second demo script.

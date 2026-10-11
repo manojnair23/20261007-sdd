@@ -41,7 +41,8 @@ describe('HomePage', () => {
     ])
   })
 
-  it('does not link to pages that do not exist yet', () => {
-    expect(main).not.toMatch(/<a[\s>]/)
+  it('links each audience card to its section', () => {
+    expect(cards).toContain('<a href="/agents">Meet the agents</a>')
+    expect(cards).toContain('<a href="/dashboard">Open the staff dashboard</a>')
   })
 })
