@@ -9,7 +9,8 @@
 :root[data-theme="light"] {
   --color-primary: #2a6f97;
   --color-primary-dark: #1d4f6c;
-  --color-accent: #e07a5f;
+  --color-accent: #e07a5f; /* decoration only: 2.8:1 on the page background */
+  --color-accent-text: #b5462a; /* accent for text: 5.1:1 on the page background */
   --color-text: #1f2a37;
   --font-heading: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
 
@@ -28,6 +29,7 @@
   --pico-primary-hover: var(--color-primary-dark);
   --pico-primary-hover-background: var(--color-primary-dark);
   --pico-primary-focus: rgb(42 111 151 / 0.35);
+  --focus-ring: var(--color-primary-dark);
 
   --pico-card-background-color: #ffffff;
   --pico-border-radius: 0.75rem;
@@ -39,6 +41,13 @@ body {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
+}
+
+/* ---------- Focus ---------- */
+/* Pico's translucent focus shadow is too faint (about 1.6:1), so add a solid outline for keyboard users. */
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 /* ---------- Typography ---------- */
@@ -58,7 +67,7 @@ h1 {
 }
 
 .hero__tagline {
-  color: var(--color-accent);
+  color: var(--color-accent-text);
   font-size: clamp(1.1rem, 1.5vw + 0.8rem, 1.375rem);
   font-weight: 600;
 }

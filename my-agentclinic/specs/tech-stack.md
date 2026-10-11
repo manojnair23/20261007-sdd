@@ -43,7 +43,7 @@ We recommend **Hono** as the web framework:
 - Source lives in `src/`; tests live alongside code as `*.test.ts`.
 - Routes grouped by domain: `agents`, `ailments`, `therapies`, `appointments`, `dashboard`.
 - Database access goes through a small typed data layer; no raw SQL in route handlers.
-- Schema changes are applied by simple, ordered SQL migration files.
+- Schema changes are applied by simple, ordered SQL migration files in `migrations/` (`NNNN_description.sql`). Each file runs inside its own transaction, so it must not contain `BEGIN`/`COMMIT`.
 - Seed data is playful and lives in a seed script.
 
 ## Validation

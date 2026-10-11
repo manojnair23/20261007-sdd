@@ -11,7 +11,7 @@ Every page a phase adds must be responsive and pass the responsive checks in `sp
 - [x] **0.4** Global stylesheet: colors, typography, responsive container.
 - [x] **0.5** Minimal AgentClinic home page (hero, tagline, audience cards).
 
-## Phase 1 — Data foundation ✅ Complete
+## Phase 1 — Data foundation (manual browser checks pending)
 - [x] **1.1** Add SQLite (`better-sqlite3`) with a DB connection module.
 - [x] **1.2** Simple migration runner and first empty migration.
 - [x] **1.3** Seed script hook (no data yet).

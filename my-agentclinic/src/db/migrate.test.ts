@@ -1,7 +1,7 @@
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { openDb, type Db } from './connection'
-import { runMigrations } from './migrate'
+import { pendingMigrations, runMigrations } from './migrate'
 
 const fixtures = join(__dirname, '__fixtures__')
 
@@ -10,6 +10,18 @@ const versions = (db: Db) =>
 
 const tableExists = (db: Db, name: string) =>
   db.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?").get(name) !== undefined
+
+describe('pendingMigrations', () => {
+  it('sorts by filename whatever order the folder lists them in', () => {
+    const files = ['0003_c.sql', '0001_a.sql', '0002_b.sql']
+    expect(pendingMigrations(files, new Set())).toEqual(['0001_a.sql', '0002_b.sql', '0003_c.sql'])
+  })
+
+  it('skips applied files and non-SQL files, and matches .sql in any case', () => {
+    const files = ['0002_b.SQL', 'README.txt', '0001_a.sql', '0003_c.sql']
+    expect(pendingMigrations(files, new Set(['0001_a.sql']))).toEqual(['0002_b.SQL', '0003_c.sql'])
+  })
+})
 
 describe('runMigrations', () => {
   it('applies pending .sql files in filename order and records each one', () => {

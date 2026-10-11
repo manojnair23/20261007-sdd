@@ -12,6 +12,7 @@ Typecheck passes, Vitest exits 0, all Phase 0 tests still pass, and the followin
 - [x] `resolveDbPath` returns `DB_PATH` when set, and `data/agentclinic.db` when unset or blank.
 
 ### Migration runner
+- [x] `pendingMigrations` sorts unsorted filenames, skips applied and non-`.sql` files, and matches `.SQL` in any case.
 - [x] Pending migrations apply in filename order, and each is recorded in `schema_migrations`.
 - [x] Running the migrations a second time applies nothing and changes nothing.
 - [x] A failing migration throws an error that names the file, leaves no partial schema behind, and is not recorded; earlier migrations stay applied.
@@ -29,9 +30,9 @@ Typecheck passes, Vitest exits 0, all Phase 0 tests still pass, and the followin
 
 ## 2. Manual CLI check
 
-Run from a clean checkout with no `data/` folder:
+Covered by `src/db/cli.test.ts`, which runs the real CLI with `DB_PATH` pointing at a new temp folder. Also run once by hand against `data/`:
 
-- [x] `npm run db:migrate` creates `data/agentclinic.db` and reports `0001_init.sql` as applied.
+- [x] `npm run db:migrate` creates the database file (and its folder) and reports `0001_init.sql` as applied.
 - [x] Running `npm run db:migrate` again reports nothing to apply.
 - [x] `npm run db:seed` runs cleanly and reports zero seeders.
 - [x] `git status` shows no files under `data/` (the folder is gitignored).
@@ -49,6 +50,8 @@ Run from a clean checkout with no `data/` folder:
 - [ ] The audience cards sit in two columns at ~1280px and stack into one column at ~375px.
 - [ ] No horizontal scroll at ~320px, and long text wraps.
 - [ ] Nav links are at least 44px tall.
+- [ ] Tabbing shows a visible focus outline on every link: white on the blue header, dark blue on the page.
+- [ ] The tagline is the darker accent (`#b5462a`) and is easy to read.
 - [ ] The page stays light even when the OS is set to dark mode.
 - [ ] No request goes to a CDN (check the browser's Network tab); the page works offline.
 - [ ] Checked in at least one current evergreen browser.

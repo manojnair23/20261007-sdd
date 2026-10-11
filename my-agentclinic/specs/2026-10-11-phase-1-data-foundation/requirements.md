@@ -47,13 +47,13 @@ Roadmap items covered: **1.1, 1.2, 1.3** in `specs/roadmap.md`, plus a new **1.4
 | D13 | **Pin the light theme** with `data-theme="light"` on `<html>`. | The brand palette is light-only today; dark mode can be designed later in the Polish phase. |
 | D14 | The responsive rules in `specs/tech-stack.md` still apply on top of Pico. In particular, nav links stay at least 44px tall and nothing scrolls sideways at ~320px. | Pico is responsive by default, but its defaults don't guarantee the project's tap-target and narrow-width rules. |
 
-## Open decisions (resolve during implementation)
+## Open decisions
 
-- **How routes get the DB (for Phase 2):** a shared module-level instance vs. passing `db` into an app factory. Not needed until a route reads data; note the choice in Phase 2.
-- **Seeder idempotence:** whether Phase 2 seeders clear-and-insert or upsert. The hook only needs to run seeders in order inside a transaction.
-- **Native build on Windows:** `better-sqlite3` ships prebuilt binaries for current Node LTS. If install falls back to a source build, note the fix here.
-- **Serving Pico:** a small route that reads `pico.min.css` once at startup vs. a second `serveStatic` rooted at Pico's `css/` folder. Either way, resolve the path from the installed package, not from the working directory.
-- **Card markup:** whether the audience cards become Pico `<article>` elements (and drop the `.card` class) or keep `.card` with Pico variables. Prefer `<article>` if the look holds up.
+- **How routes get the DB — deferred to Phase 2.** Recommendation from the Phase 1 review: before the first route reads data, replace the module-level `app` with `createApp(db)` (or `c.set('db')` middleware). `index.ts` then passes its handle in, and tests pass a migrated `:memory:` database. Otherwise a route that imports a shared handle would make `app.test.ts` open the real `data/agentclinic.db`.
+- **Seeder idempotence — deferred to Phase 2:** whether Phase 2 seeders clear-and-insert or upsert. The hook only needs to run seeders in order inside a transaction.
+- **Native build on Windows — resolved (see Implementation notes):** `better-sqlite3` ships prebuilt binaries for current Node LTS. If install falls back to a source build, note the fix here.
+- **Serving Pico — resolved (see Implementation notes):** a small route that reads `pico.min.css` once at startup vs. a second `serveStatic` rooted at Pico's `css/` folder. Either way, resolve the path from the installed package, not from the working directory.
+- **Card markup — resolved (see Implementation notes):** whether the audience cards become Pico `<article>` elements (and drop the `.card` class) or keep `.card` with Pico variables. Prefer `<article>` if the look holds up.
 
 ## Constraints
 
@@ -71,3 +71,10 @@ Roadmap items covered: **1.1, 1.2, 1.3** in `specs/roadmap.md`, plus a new **1.4
 - **Theme overrides:** brand variables live under `:root[data-theme="light"]`. That matches the specificity of Pico's `:root:not([data-theme=dark])` light-theme selector, and `styles.css` loads after Pico, so the brand wins.
 - **Container:** Pico's `.container` replaced the custom one, so the content is wider at desktop widths (up to 1200px at ≥1280px, where it used to be 64rem).
 - **Migration fixtures:** these are `.sql` files under `src/db/__fixtures__/`. `tsc` never emits them, so `dist/` stays clean without a build exclude.
+- **Migrations and transactions:** each migration file already runs inside a transaction, so a file must not contain `BEGIN`/`COMMIT`, and `PRAGMA foreign_keys` has no effect inside one. If Phase 2 needs SQLite's table-rebuild procedure (foreign keys off), the runner has to grow a way to do that outside the transaction.
+- **Migration file matching:** the runner takes only regular files whose names end in `.sql` in any case (`0002_x.SQL` counts). Read errors are reported with the file name.
+- **CLI evidence:** `src/db/cli.test.ts` runs the real CLI in a child process against a new database in a temp folder. It covers creating the file and its parent folder, a second migrate with nothing to apply, a seed run with zero seeders, and usage plus exit code 1 on an unknown command. Migration failures print the message and exit 1 instead of an uncaught stack trace.
+- **Startup evidence:** `npm start` was run from a different working directory with a new `DB_PATH`. It logged "Database ready … (1 migration(s) applied)" and served `/`, `/styles.css`, and `/pico.min.css`. `npm run dev` created `data/agentclinic.db` on startup. The server now logs the database path and closes the database on SIGINT/SIGTERM.
+- **Relative `DB_PATH`:** a relative value resolves against the working directory, while the default resolves against the repo. Use an absolute path when starting from elsewhere.
+- **Accessibility fixes from review:** the tagline uses a darker accent (`#b5462a`, 5.1:1 on the page background) because `#e07a5f` was 2.8:1. That color stays for decoration only. Pico's translucent focus shadow was too faint, so `:focus-visible` adds a solid 2px outline: dark blue on the page and white on the blue header bar.
+- **Types:** `@types/better-sqlite3` 9.x is behind `better-sqlite3` 13. The API in use (`pragma`, `prepare`/`pluck`, `transaction`, `exec`) typechecks, but newer options may not be typed.

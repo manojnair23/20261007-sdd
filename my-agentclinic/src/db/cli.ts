@@ -23,6 +23,9 @@ try {
   if (command === 'seed') {
     console.log(`Ran ${runSeed(db)} seeder(s).`)
   }
+} catch (err) {
+  console.error((err as Error).message)
+  process.exitCode = 1
 } finally {
   db.close()
 }
