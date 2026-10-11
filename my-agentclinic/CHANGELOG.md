@@ -3,6 +3,7 @@
 All notable changes to this project, newest first.
 
 ## 2026-10-11
+- Combine roadmap Phases 2–5 (Agents, Ailments, Therapies, Appointments) into a single Phase 2, and renumber Dashboard and Polish to Phases 3 and 4
 - Require responsive design in the mission, tech stack, roadmap, and Phase 0 specs; add 44px nav tap targets, wrapping for long words, and a viewport meta tag test
 - Add `npm run validate` (typecheck, then the Vitest suite) as the single check before review, and update the specs to use it
 - Add a HomePage test suite
