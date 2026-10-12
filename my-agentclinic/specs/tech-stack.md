@@ -44,7 +44,8 @@ We recommend **Hono** as the web framework:
 - Routes grouped by domain: `agents`, `ailments`, `therapies`, `appointments`, `dashboard`.
 - Database access goes through a small typed data layer; no raw SQL in route handlers.
 - Schema changes are applied by simple, ordered SQL migration files in `migrations/` (`NNNN_description.sql`). Each file runs inside its own transaction, so it must not contain `BEGIN`/`COMMIT`.
-- Seed data is playful and lives in a seed script.
+- Seed data is playful and lives in `src/db/seedData.ts`. `npm run db:seed` **resets** the clinic data. It refuses when appointments exist unless run with `--force`.
+- Clinic time is the server's local time zone; set `TZ` to pin it.
 
 ## Validation
 

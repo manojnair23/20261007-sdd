@@ -6,10 +6,12 @@ import { Main } from './layout/Main'
 
 type LayoutProps = {
   title: string
+  /** The request path, used to mark the current nav link. */
+  path?: string
   children?: Child
 }
 
-export const Layout = ({ title, children }: LayoutProps) => (
+export const Layout = ({ title, path, children }: LayoutProps) => (
   <>
     {raw('<!doctype html>')}
     <html lang="en" data-theme="light">
@@ -21,10 +23,16 @@ export const Layout = ({ title, children }: LayoutProps) => (
         <link rel="stylesheet" href="/styles.css" />
       </head>
       <body>
-        <Header />
+        <a class="skip-link" href="#main">
+          Skip to content
+        </a>
+        <Header path={path} />
         <Main>{children}</Main>
         <Footer />
       </body>
     </html>
   </>
 )
+
+/** Page title in the "Agents · AgentClinic" form. */
+export const pageTitle = (name: string) => `${name} · AgentClinic`

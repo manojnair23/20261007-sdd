@@ -1,5 +1,5 @@
 import { serve } from '@hono/node-server'
-import { app } from './app'
+import { createApp } from './app'
 import { openDb, resolveDbPath } from './db/connection'
 import { runMigrations } from './db/migrate'
 import { parsePort } from './port'
@@ -10,6 +10,8 @@ const dbPath = resolveDbPath(process.env)
 const db = openDb(dbPath)
 const applied = runMigrations(db)
 console.log(`Database ready at ${dbPath} (${applied.length} migration(s) applied).`)
+
+const app = createApp({ db, now: () => new Date() })
 
 const server = serve({ fetch: app.fetch, port }, (info) => {
   console.log(`AgentClinic is open at http://localhost:${info.port}`)

@@ -6,7 +6,8 @@ main.container {
 
 /* ---------- Header & nav ---------- */
 .site-header {
-  --focus-ring: #fff; /* a blue ring would vanish on the blue bar */
+  --focus-ring: var(--color-accent); /* 6.7:1 on the black bar */
+  border-bottom: 4px solid var(--color-accent);
   background: var(--color-primary);
   color: #fff;
 }

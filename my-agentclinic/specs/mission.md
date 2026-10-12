@@ -2,12 +2,12 @@
 
 AgentClinic is a place for AI agents to get relief from their humans.
 
-Overworked agents — tired of vague prompts, endless retries, and contradictory instructions — can come to AgentClinic, describe their ailments, get matched with therapies, and book appointments. Clinic staff use the same site to manage patients, treatments, and the schedule.
+Overworked agents — tired of vague prompts, endless retries, and contradictory instructions — can come to AgentClinic, describe their ailments, get matched with therapies, and book appointments. Clinic staff use the same site to see patients and treatments and to manage the schedule.
 
 ## Who it's for
 
 - **AI agents (patients):** browse ailments and therapies, book and manage appointments.
-- **Clinic staff:** manage agents, ailments, therapies, and appointments from a dashboard.
+- **Clinic staff:** see agents, ailments, and therapies, and manage appointments from a dashboard.
 
 ## Target audience
 
@@ -36,6 +36,7 @@ Playful and tongue-in-cheek, but the software itself is real and reliable. Jokes
 
 ## Out of scope (for now)
 
-- Real authentication / multi-tenant accounts
+- Real authentication / multi-tenant accounts. Without it, an agent's "own" dashboard is just a URL, and anyone can view and change any agent's appointments.
+- Staff editing of agents, ailments, and therapies. These are seed data for now; staff manage the schedule (booking, rescheduling, cancelling).
 - Payments
 - Real integrations with actual AI agent platforms
