@@ -19,10 +19,19 @@ npm run dev       # http://localhost:3000, reloads on change
 | Script | What it does |
 |---|---|
 | `npm run dev` | Start the server in watch mode (runs pending migrations on startup) |
-| `npm run validate` | Typecheck, then run the full Vitest suite. Run this before review |
+| `npm run validate` | Typecheck, then lint, then run the full Vitest suite. Run this before review |
+| `npm run lint` | ESLint for correctness, then a Prettier check that every file is formatted |
+| `npm run lint:fix` | Apply ESLint's automatic fixes |
+| `npm run format` / `npm run format:check` | Format every file with Prettier / only report files that aren't formatted |
 | `npm run build` / `npm start` | Compile to `dist/` / run the compiled server |
 | `npm run db:migrate` | Apply pending SQL migrations from `migrations/` |
 | `npm run db:seed` | Load the demo data into an empty clinic. If appointments already exist it refuses; `npm run db:seed -- --force` **wipes** all clinic data and reloads the seed |
+
+The whole codebase was reformatted by Prettier in one commit. To make `git blame` skip it, run this once per clone, from the repository root:
+
+```sh
+git config blame.ignoreRevsFile my-agentclinic-legacy/.git-blame-ignore-revs
+```
 
 | Variable | Default | Purpose |
 |---|---|---|

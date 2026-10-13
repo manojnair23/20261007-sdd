@@ -42,12 +42,12 @@ Legend: ✅ done · ⬜ to do
 - ✅ 4.3 A responsive review and a crawler test for internal links
 - ✅ 4.4 An orange and black colour scheme with contrast-checked text colours
 
-## Phase 5 — Linting and formatting ⬜
+## Phase 5 — Linting and formatting ✅
 
-- ⬜ 5.1 Add ESLint (flat config, `typescript-eslint`) and `npm run lint`; fix or justify every finding
-- ⬜ 5.2 Add Prettier with a `.prettierrc` that matches the current style, and `npm run format`
-- ⬜ 5.3 Format the whole codebase in one separate commit, with no other changes
-- ⬜ 5.4 `npm run validate` becomes typecheck → lint → test; update the README
+- ✅ 5.1 Add ESLint (flat config, `typescript-eslint`) and `npm run lint`; fix or justify every finding
+- ✅ 5.2 Add Prettier with a `.prettierrc` that matches the current style, and `npm run format`
+- ✅ 5.3 Format the whole codebase in one separate commit, with no other changes
+- ✅ 5.4 `npm run validate` becomes typecheck → lint → test; update the README
 
 ## Phase 6 — Staff CRUD ⬜
 

@@ -2,6 +2,12 @@
 
 All notable changes to this project, newest first.
 
+## 2026-10-13
+- Build Phase 5 (Linting and formatting): ESLint with `typescript-eslint` (`npm run lint`, `npm run lint:fix`), Prettier matching the existing style (`npm run format`, `npm run format:check`), and `npm run validate` now runs typecheck → lint → test
+- Fix the one ESLint finding: write the narrow no-break space in `src/time.ts` as `\u202f` instead of an invisible literal
+- Format the codebase with Prettier in its own commit, listed in `.git-blame-ignore-revs`; the seed tables keep one row per line and CSS keeps double quotes
+- Write the Phase 5 requirements, plan, and validation specs
+
 ## 2026-10-11
 - Mark Phase 1 (Data foundation) complete in the roadmap after its manual browser checks passed
 - Fix Phase 1 review findings: case-insensitive `.sql` matching that skips folders, a real sort test, CLI tests in a child process, clean CLI errors, closing the DB on shutdown, a readable tagline accent, visible focus outlines, and spec fixes (resolved and deferred decisions, Phase 1 not marked complete until the browser checks pass)

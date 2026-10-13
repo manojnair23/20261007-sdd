@@ -15,6 +15,8 @@ The stack is popular, TypeScript from end to end, and deliberately small, so stu
 | Migrations | Hand-written ordered SQL in `migrations/NNNN_name.sql` | They run on startup and with `npm run db:migrate`. There's no `BEGIN`/`COMMIT` inside a migration file; the runner wraps each one. |
 | Seed data | `src/db/seedData.ts`, run by `npm run db:seed` | Resets the demo. It refuses if appointments exist, unless `--force` is passed. |
 | Tests | Vitest 5 | Unit, data-layer, route, accessibility sweep, and link-crawler tests. Tests use an in-memory database and a fixed clock through `createApp({ db, now })`. |
+| Linting | ESLint 10, flat config (`eslint.config.mjs`) with `@eslint/js` and `typescript-eslint` recommended rules | For correctness only. `eslint-config-prettier` turns off every rule that Prettier owns. |
+| Formatting | Prettier 3 (`.prettierrc`) | No semicolons, single quotes (double in CSS), trailing commas, print width 120. Markdown, SQL, and test fixtures aren't formatted. The seed tables in `src/db/seedData.ts` opt out with `// prettier-ignore`. |
 | Dev loop | `tsx watch` | `npm run dev` reloads on change. |
 
 ## Conventions
@@ -25,13 +27,13 @@ The stack is popular, TypeScript from end to end, and deliberately small, so stu
 - **Forms:** POST-Redirect-GET with a 303 on success, a re-rendered form with a 400 on validation errors, and a 409 for actions that are no longer allowed. Forms use `novalidate`, and the server enforces every rule.
 - **Clinic time:** naive local `YYYY-MM-DDTHH:mm` strings. Set `TZ` to pin the zone.
 - **Accessibility:** one `<h1>` per page, a skip link, labelled fields, `scope` on table headers, visible focus, and `aria-current` in the nav.
-- **One gate:** `npm run validate` must pass before review and after every phase.
+- **One gate:** `npm run validate` (typecheck → lint → test) must pass before review and after every phase. `npm run lint` covers both ESLint and the Prettier check, and `npm run format` fixes formatting.
 
 ## Gaps to close
 
 | Gap | Decision | Roadmap |
 |---|---|---|
-| **Linting and formatting** | Add **ESLint** (flat config with `typescript-eslint`) for correctness rules and **Prettier** for formatting. Add `npm run lint` and `npm run format`. `npm run validate` becomes typecheck → lint → test. Formatting the existing code is its own commit, so the diff stays reviewable. | Phase 5 |
+| ~~**Linting and formatting**~~ | **Closed in Phase 5.** ESLint and Prettier are in the current stack above, and `npm run validate` runs typecheck → lint → test. | Phase 5 ✅ |
 | **Staff writes and CSRF** | Staff CRUD adds new state-changing forms. They stay plain HTML posts. CSRF protection (Hono's `csrf()` origin check) comes in with those forms, because it costs one line and models good practice for students. | Phase 6 |
 
 ### Deliberately not added (for now)
