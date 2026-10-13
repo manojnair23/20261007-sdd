@@ -54,7 +54,7 @@ const dateTimeFormat = new Intl.DateTimeFormat('en-US', {
 const timeFormat = new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit' })
 
 // ICU puts a narrow no-break space before AM/PM; use a plain space so copy and tests stay simple.
-const plain = (text: string) => text.replace(/ /g, ' ')
+const plain = (text: string) => text.replace(/\u202f/g, ' ')
 
 /** Human-readable slot, for example "Mon, Oct 12, 2026, 2:30 PM". */
 export function formatSlot(slot: Slot): string {
