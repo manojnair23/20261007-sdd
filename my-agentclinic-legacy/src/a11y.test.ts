@@ -15,6 +15,9 @@ const PAGES: [string, number][] = [
   ['/agents?notice=deleted', 200],
   ['/ailments', 200],
   ['/ailments/1', 200],
+  ['/ailments/1?notice=created', 200],
+  ['/ailments/new', 200],
+  ['/ailments/1/edit', 200],
   ['/therapies', 200],
   ['/appointments', 200],
   ['/appointments/new', 200],
@@ -25,32 +28,31 @@ const PAGES: [string, number][] = [
   ['/no-such-page', 404],
 ]
 
+// Forms posted with invalid input, which re-render with errors, and a cross-origin post the CSRF
+// check refuses. None of them change the database, so they can share one app.
+const POSTS: [string, string, number, Record<string, string>?][] = [
+  ['/appointments/new', 'invalid', 400, { agent: '', therapy: '', startsAt: '' }],
+  ['/agents/new', 'invalid', 400],
+  ['/agents/1/edit', 'invalid', 400],
+  ['/agents/1/ailments', 'invalid', 400],
+  ['/ailments/new', 'invalid', 400],
+  ['/ailments/1/edit', 'invalid', 400],
+  ['/appointments/new', 'cross-origin', 403, { Origin: 'https://evil.example' }],
+]
+
 const { app } = testApp()
 
 const pages = async () => {
   const fetched = await Promise.all(
     PAGES.map(async ([path, expected]) => ({ path, expected, ...(await get(app, path)) })),
   )
-  // Also check a form re-rendered with errors.
-  const invalid = await post(app, '/appointments/new', { agent: '', therapy: '', startsAt: '' })
-  const invalidAgent = await post(app, '/agents/new', {})
-  const invalidEdit = await post(app, '/agents/1/edit', {})
-  const invalidAilment = await post(app, '/agents/1/ailments', {})
-  // And the page a cross-origin form post gets from the CSRF check.
-  const forbidden = await post(app, '/appointments/new', {}, { headers: { Origin: 'https://evil.example' } })
-  return [
-    ...fetched,
-    { path: 'POST /appointments/new (invalid)', expected: 400, status: invalid.status, body: invalid.body },
-    { path: 'POST /agents/new (invalid)', expected: 400, status: invalidAgent.status, body: invalidAgent.body },
-    { path: 'POST /agents/1/edit (invalid)', expected: 400, status: invalidEdit.status, body: invalidEdit.body },
-    {
-      path: 'POST /agents/1/ailments (invalid)',
-      expected: 400,
-      status: invalidAilment.status,
-      body: invalidAilment.body,
-    },
-    { path: 'POST /appointments/new (cross-origin)', expected: 403, status: forbidden.status, body: forbidden.body },
-  ]
+  const posted = []
+  for (const [path, label, expected, extra = {}] of POSTS) {
+    const crossOrigin = label === 'cross-origin'
+    const { status, body } = crossOrigin ? await post(app, path, {}, { headers: extra }) : await post(app, path, extra)
+    posted.push({ path: `POST ${path} (${label})`, expected, status, body })
+  }
+  return [...fetched, ...posted]
 }
 
 describe('accessibility baseline on every page', async () => {

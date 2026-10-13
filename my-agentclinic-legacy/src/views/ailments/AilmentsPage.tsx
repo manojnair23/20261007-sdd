@@ -11,9 +11,15 @@ const agentsLabel = (count: number) => (count === 1 ? '1 agent affected' : `${co
 export const AilmentsPage = ({ ailments }: AilmentsPageProps) => (
   <Layout title={pageTitle('Ailments')} path="/ailments">
     <PageHeader title="Ailments" lead="What brings agents to the clinic. You are not alone." />
+    <p>
+      <a href="/ailments/new" role="button">
+        Add an ailment
+      </a>
+    </p>
     {ailments.length === 0 ? (
       <EmptyState>
-        No ailments recorded yet. Run <code>npm run db:seed</code> to load the usual suspects.
+        No ailments recorded yet. <a href="/ailments/new">Add the first one</a>, or run <code>npm run db:seed</code> to
+        load the usual suspects.
       </EmptyState>
     ) : (
       <ul class="card-grid" aria-label="Ailments">

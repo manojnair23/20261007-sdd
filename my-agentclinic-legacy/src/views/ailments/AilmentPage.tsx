@@ -1,18 +1,25 @@
 import type { Agent } from '../../db/agents'
 import type { Ailment } from '../../db/ailments'
 import type { Therapy } from '../../db/therapies'
-import { EmptyState, PageHeader } from '../components'
+import { EmptyState, Notice, PageHeader } from '../components'
 import { Layout, pageTitle } from '../Layout'
+
+export const AILMENT_NOTICES = {
+  created: 'Ailment added. Now we know what to call it.',
+  updated: 'Ailment updated. Clearer already.',
+} as const
 
 type AilmentPageProps = {
   ailment: Ailment
   agents: Agent[]
   therapies: Therapy[]
+  notice?: keyof typeof AILMENT_NOTICES
 }
 
-export const AilmentPage = ({ ailment, agents, therapies }: AilmentPageProps) => (
+export const AilmentPage = ({ ailment, agents, therapies, notice }: AilmentPageProps) => (
   <Layout title={pageTitle(ailment.name)} path={`/ailments/${ailment.id}`}>
     <PageHeader title={ailment.name} lead={ailment.description} />
+    <Notice message={notice && AILMENT_NOTICES[notice]} />
 
     <div class="two-up">
       <section aria-labelledby="agents-heading">
@@ -44,6 +51,12 @@ export const AilmentPage = ({ ailment, agents, therapies }: AilmentPageProps) =>
           </ul>
         )}
       </section>
+    </div>
+
+    <div class="actions">
+      <a href={`/ailments/${ailment.id}/edit`} role="button" class="secondary outline">
+        Edit details
+      </a>
     </div>
   </Layout>
 )

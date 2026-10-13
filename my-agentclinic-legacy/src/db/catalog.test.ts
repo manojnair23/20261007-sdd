@@ -10,13 +10,16 @@ import {
   updateAgent,
 } from './agents'
 import {
+  ailmentNameTaken,
   assignAilment,
+  createAilment,
   getAilment,
   listAgentsWithAilment,
   listAilments,
   listAilmentsForAgent,
   listAilmentsNotForAgent,
   unassignAilment,
+  updateAilment,
 } from './ailments'
 import { getTherapy, listRecommendedTherapies, listTherapies, listTherapiesForAilment } from './therapies'
 
@@ -96,6 +99,26 @@ describe('ailments', () => {
     expect(names(listAgentsWithAilment(db, 1))).toEqual(['GPT-Overthinker', 'Loopy McRetry', 'Prompta Vague'])
     expect(getAilment(db, 2)?.name).toBe('Context-window claustrophobia')
     expect(getAilment(db, 999)).toBeUndefined()
+  })
+
+  it('creates and updates an ailment, and reports an unknown id', () => {
+    const { db } = testApp()
+    const ailment = { name: 'Emoji overload', description: 'Ends every reply with a rocket.' }
+    const id = createAilment(db, ailment)
+    expect(id).toBe(7)
+    expect(getAilment(db, id)).toEqual({ id, ...ailment })
+
+    const changes = { name: 'Emoji fatigue', description: 'Has stopped using the rocket.' }
+    expect(updateAilment(db, id, changes)).toBe(true)
+    expect(getAilment(db, id)).toEqual({ id, ...changes })
+    expect(updateAilment(db, 999, changes)).toBe(false)
+  })
+
+  it('knows when an ailment name is taken, ignoring case, and can skip one ailment', () => {
+    expect(ailmentNameTaken(db, 'prompt FATIGUE')).toBe(true)
+    expect(ailmentNameTaken(db, 'Prompt fatigue', 1)).toBe(false)
+    expect(ailmentNameTaken(db, 'Prompt fatigue', 2)).toBe(true)
+    expect(ailmentNameTaken(db, 'Prompt euphoria')).toBe(false)
   })
 
   it("lists the ailments an agent doesn't have", () => {
