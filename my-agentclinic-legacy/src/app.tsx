@@ -2,13 +2,15 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { Hono } from 'hono'
 import { serveStatic } from '@hono/node-server/serve-static'
+import { csrf } from 'hono/csrf'
+import { HTTPException } from 'hono/http-exception'
 import type { AppDeps } from './deps'
 import { agentRoutes } from './routes/agents'
 import { ailmentRoutes } from './routes/ailments'
 import { appointmentRoutes } from './routes/appointments'
 import { dashboardRoutes } from './routes/dashboard'
 import { therapyRoutes } from './routes/therapies'
-import { NotFoundPage, ServerErrorPage } from './views/ErrorPages'
+import { ForbiddenPage, NotFoundPage, ServerErrorPage } from './views/ErrorPages'
 import { HomePage } from './views/HomePage'
 
 export type { AppDeps } from './deps'
@@ -22,6 +24,9 @@ const picoCss = readFileSync(require.resolve('@picocss/pico/css/pico.min.css'), 
 /** Builds the app around its database and clock, so tests can pass their own. */
 export function createApp(deps: AppDeps) {
   const app = new Hono()
+
+  // Reject form posts that come from another site: the Origin (or Sec-Fetch-Site) must be this app.
+  app.use('*', csrf())
 
   app.get('/pico.min.css', (c) => c.body(picoCss, 200, { 'Content-Type': 'text/css; charset=utf-8' }))
 
@@ -38,6 +43,8 @@ export function createApp(deps: AppDeps) {
   app.notFound((c) => c.html(<NotFoundPage path={c.req.path} />, 404))
 
   app.onError((err, c) => {
+    // csrf() throws a 403; it's an expected refusal, not a server fault, so it isn't logged.
+    if (err instanceof HTTPException && err.status === 403) return c.html(<ForbiddenPage />, 403)
     console.error(err)
     return c.html(<ServerErrorPage />, 500)
   })
