@@ -41,9 +41,12 @@ Four small steps, in roadmap order. Each step ends with `npm run validate` passi
      "trailingComma": "all",
      "tabWidth": 2,
      "printWidth": 120,
-     "endOfLine": "auto"
+     "endOfLine": "auto",
+     "overrides": [{ "files": "*.css", "options": { "singleQuote": false } }]
    }
    ```
+
+   The CSS override was added in Step 3. `singleQuote` also applies to CSS, which has always used double quotes, and the static-files test in `src/app.test.ts` checks for `@import url("layout.css")`.
 
 3. Add `.prettierignore`:
 
@@ -63,10 +66,11 @@ Four small steps, in roadmap order. Each step ends with `npm run validate` passi
 ## Step 3 — Format the codebase (5.3)
 
 1. Run `npm run validate` and note the test count.
-2. Run `npm run format`.
-3. Run `npm run validate` again. It must pass with the same test count.
-4. Check that `git status` shows only files in Prettier's scope (`.ts`, `.tsx`, `.css`, `.json`, `.mjs`), and that `package.json` changed only in layout, if at all.
-5. Pause for review. **Commit 3:** "Format the codebase with Prettier", containing Prettier's output and nothing else.
+2. Before formatting, add `// prettier-ignore` to the five seed tables in `src/db/seedData.ts`, so each keeps one row per line, and add the CSS override above. Commit these on their own first ("Tune Prettier for the seed tables and CSS quotes"), so the formatting commit stays pure Prettier output.
+3. Run `npm run format`.
+4. Run `npm run validate` again. It must pass with the same test count.
+5. Check that `git status` shows only files in Prettier's scope (`.ts`, `.tsx`, `.css`, `.json`, `.mjs`), and that `package.json` changed only in layout, if at all.
+6. Pause for review. **Commit 3:** "Format the codebase with Prettier", containing Prettier's output and nothing else.
 
 ## Step 4 — Wire it into validate, and update the docs (5.4)
 

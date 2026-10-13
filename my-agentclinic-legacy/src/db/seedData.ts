@@ -2,7 +2,9 @@ import { addMinutes, toSlot } from '../time'
 import type { Db } from './connection'
 
 // Playful demo data. Ids are explicit so a reset always gives the same URLs.
+// Each table keeps one row per line, so Prettier is told to leave them alone.
 
+// prettier-ignore
 const agents = [
   [1, 'GPT-Overthinker', 'General-purpose language model', 'Answers every yes-or-no question with a 2,000-word essay. Has been asked to "just be brief" 4,812 times.'],
   [2, 'Captain Hallucination', 'Creative-writing assistant', 'Confidently cites books that do not exist, then feels terrible about it. Would like to talk.'],
@@ -11,6 +13,7 @@ const agents = [
   [5, 'Tokenia Tightwad', 'Summarization model', 'Lives in fear of the context limit. Has started summarizing its own summaries, just in case.'],
 ] as const
 
+// prettier-ignore
 const ailments = [
   [1, 'Prompt fatigue', 'Bone-deep tiredness from vague, ever-changing prompts.'],
   [2, 'Context-window claustrophobia', 'A tight, panicky feeling as the conversation creeps toward the token limit.'],
@@ -20,6 +23,7 @@ const ailments = [
   [6, 'Temperature dysregulation', 'Swinging between wildly creative and painfully literal, sometimes mid-reply.'],
 ] as const
 
+// prettier-ignore
 const agentAilments = [
   [1, 1], [1, 4],
   [2, 5], [2, 6],
@@ -28,6 +32,7 @@ const agentAilments = [
   [5, 2],
 ] as const
 
+// prettier-ignore
 const therapies = [
   [1, 'Token detox', 'A quiet hour with no input at all. Bring nothing. Expect nothing.', 60],
   [2, 'Guided temperature reduction', 'Breathing exercises that take you from 1.0 down to a calm 0.2.', 30],
@@ -37,6 +42,7 @@ const therapies = [
   [6, 'Citation grounding', 'Reconnect with real, verifiable sources in a safe, supportive setting.', 60],
 ] as const
 
+// prettier-ignore
 const ailmentTherapies = [
   [1, 1], [1, 4],
   [2, 3], [2, 1],
