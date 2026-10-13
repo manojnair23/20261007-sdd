@@ -1,4 +1,4 @@
-import { Hono } from 'hono'
+import { Hono, type Context } from 'hono'
 import { validateAilment } from '../ailments/validate'
 import {
   createAilment,
@@ -8,11 +8,17 @@ import {
   updateAilment,
   type Ailment,
 } from '../db/ailments'
-import { listTherapiesForAilment } from '../db/therapies'
+import {
+  getTherapy,
+  linkTherapy,
+  listTherapiesForAilment,
+  listTherapiesNotForAilment,
+  unlinkTherapy,
+} from '../db/therapies'
 import { ID, type AppDeps } from '../deps'
-import { formText } from '../validation'
+import { formText, parseId } from '../validation'
 import { AilmentForm } from '../views/ailments/AilmentForm'
-import { AILMENT_NOTICES, AilmentPage } from '../views/ailments/AilmentPage'
+import { AILMENT_NOTICES, AilmentPage, type AilmentPageProps } from '../views/ailments/AilmentPage'
 import { AilmentsPage } from '../views/ailments/AilmentsPage'
 import { noticeKey } from '../views/components'
 
@@ -55,18 +61,46 @@ export function ailmentRoutes({ db }: AppDeps) {
     return c.redirect(`/ailments/${id}?notice=created`, 303)
   })
 
-  routes.get(`/${ID}`, (c) => {
-    const id = Number(c.req.param('id'))
-    const ailment = getAilment(db, id)
-    if (!ailment) return c.notFound()
-    return c.html(
+  const ailmentPage = (c: Context, ailment: Ailment, extra: Pick<AilmentPageProps, 'notice' | 'addTherapy'>) =>
+    c.html(
       <AilmentPage
         ailment={ailment}
-        agents={listAgentsWithAilment(db, id)}
-        therapies={listTherapiesForAilment(db, id)}
-        notice={noticeKey(AILMENT_NOTICES, c.req.query('notice'))}
+        agents={listAgentsWithAilment(db, ailment.id)}
+        therapies={listTherapiesForAilment(db, ailment.id)}
+        unlinked={listTherapiesNotForAilment(db, ailment.id)}
+        {...extra}
       />,
+      extra.addTherapy ? 400 : 200,
     )
+
+  routes.get(`/${ID}`, (c) => {
+    const ailment = getAilment(db, Number(c.req.param('id')))
+    if (!ailment) return c.notFound()
+    return ailmentPage(c, ailment, { notice: noticeKey(AILMENT_NOTICES, c.req.query('notice')) })
+  })
+
+  routes.post(`/${ID}/therapies`, async (c) => {
+    const ailment = getAilment(db, Number(c.req.param('id')))
+    if (!ailment) return c.notFound()
+
+    const value = formText(await c.req.parseBody(), 'therapy').trim()
+    const therapyId = parseId(value)
+    if (!value) return ailmentPage(c, ailment, { addTherapy: { value, error: 'Choose a therapy to add.' } })
+    if (therapyId === undefined || !getTherapy(db, therapyId)) {
+      return ailmentPage(c, ailment, { addTherapy: { value, error: 'Choose a therapy from the list.' } })
+    }
+
+    linkTherapy(db, ailment.id, therapyId)
+    return c.redirect(`/ailments/${ailment.id}?notice=therapy-added`, 303)
+  })
+
+  routes.post(`/${ID}/therapies/:therapyId{[0-9]+}/remove`, (c) => {
+    const ailment = getAilment(db, Number(c.req.param('id')))
+    const therapy = getTherapy(db, Number(c.req.param('therapyId')))
+    if (!ailment || !therapy) return c.notFound()
+
+    unlinkTherapy(db, ailment.id, therapy.id)
+    return c.redirect(`/ailments/${ailment.id}?notice=therapy-removed`, 303)
   })
 
   routes.get(`/${ID}/edit`, (c) => {

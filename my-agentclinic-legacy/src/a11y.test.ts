@@ -18,6 +18,7 @@ const PAGES: [string, number][] = [
   ['/ailments/1?notice=created', 200],
   ['/ailments/new', 200],
   ['/ailments/1/edit', 200],
+  ['/ailments/1?notice=therapy-added', 200],
   ['/therapies', 200],
   ['/appointments', 200],
   ['/appointments/new', 200],
@@ -37,6 +38,7 @@ const POSTS: [string, string, number, Record<string, string>?][] = [
   ['/agents/1/ailments', 'invalid', 400],
   ['/ailments/new', 'invalid', 400],
   ['/ailments/1/edit', 'invalid', 400],
+  ['/ailments/1/therapies', 'invalid', 400],
   ['/appointments/new', 'cross-origin', 403, { Origin: 'https://evil.example' }],
 ]
 

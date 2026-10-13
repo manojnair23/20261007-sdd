@@ -17,7 +17,7 @@ The phase is done when every box below is ticked. Tick each slice's boxes as it'
 - [x] **6.5** Assigning and unassigning ailments works and is idempotent. An unknown ailment in the body returns 400. The booking form's recommended therapies follow the change.
 - [x] **6.6** Deleting an agent with no appointments removes the agent and their ailment links. An agent with any appointment returns 409 on both GET and POST, and the database doesn't change.
 - [x] **6.7** Creating and editing an ailment follows the same rules as agents.
-- [ ] **6.8** Linking and unlinking therapies works and is idempotent, and `/therapies` shows the change.
+- [x] **6.8** Linking and unlinking therapies works and is idempotent, and `/therapies` shows the change.
 - [ ] **6.9** Deleting an ailment removes it and its links to agents and therapies. It's never blocked.
 - [ ] **6.10** Creating and editing a therapy: the duration must be a whole number from 1 to 480. A therapy with upcoming appointments can't change its duration, but can change its name and description.
 - [ ] **6.11** Deleting a therapy with no appointments works. One with any appointment returns 409 and the database doesn't change.

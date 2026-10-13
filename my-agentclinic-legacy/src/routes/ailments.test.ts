@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { getAilment, listAilments } from '../db/ailments'
+import { linkTherapy, listTherapiesForAilment } from '../db/therapies'
 import { get, post, testApp } from '../test/testApp'
 
 // Staff management of ailments. The read-only ailment pages are tested in catalog.test.ts.
@@ -116,5 +117,96 @@ describe('editing an ailment', () => {
   it('shows no notice for unknown notice values', async () => {
     const { app } = testApp()
     expect((await get(app, '/ailments/1?notice=constructor')).body).toContain('<div role="status"></div>')
+  })
+})
+
+describe("managing an ailment's therapies", () => {
+  const therapyNames = (db: ReturnType<typeof testApp>['db'], ailmentId: number) =>
+    listTherapiesForAilment(db, ailmentId).map((t) => t.name)
+
+  it('shows a Remove button for each therapy, named for screen readers', async () => {
+    const { app } = testApp()
+    const { body } = await get(app, '/ailments/1')
+    expect(body).toContain('<form method="post" action="/ailments/1/therapies/1/remove">')
+    expect(body).toContain('aria-label="Remove Token detox from Prompt fatigue"')
+    expect(body).toContain('<a href="/therapies#therapy-1">Token detox</a> (60 min)')
+  })
+
+  it('offers only the therapies not linked yet', async () => {
+    const { app } = testApp()
+    const { body } = await get(app, '/ailments/1')
+    expect(body).toContain('<form method="post" action="/ailments/1/therapies" novalidate="">')
+    expect(body).toContain('<label for="therapy">Add a therapy</label>')
+    expect([...body.matchAll(/<option value="(\d+)"/g)].map((m) => m[1])).toEqual(['6', '3', '5', '2'])
+  })
+
+  it('says so when there is nothing left to add', async () => {
+    const { app, db } = testApp()
+    for (const id of [2, 3, 5, 6]) linkTherapy(db, 1, id)
+    const { body } = await get(app, '/ailments/1')
+    expect(body).toContain('There are no other therapies to add.')
+    expect(body).not.toContain('action="/ailments/1/therapies"')
+  })
+
+  it('links a therapy and redirects with a notice; linking it again changes nothing', async () => {
+    const { app, db } = testApp()
+    for (let i = 0; i < 2; i++) {
+      const { status, location } = await post(app, '/ailments/2/therapies', { therapy: '6' })
+      expect(status).toBe(303)
+      expect(location).toBe('/ailments/2?notice=therapy-added')
+    }
+    expect(therapyNames(db, 2)).toEqual(['Citation grounding', 'Context decluttering', 'Token detox'])
+    expect((await get(app, '/ailments/2?notice=therapy-added')).body).toContain(
+      '<div role="status" class="notice">Therapy added. Help is on the way.</div>',
+    )
+  })
+
+  it('shows the change on the therapies page and in booking recommendations', async () => {
+    const { app } = testApp()
+    await post(app, '/ailments/2/therapies', { therapy: '6' })
+
+    const therapies = (await get(app, '/therapies')).body
+    const grounding = /<article id="therapy-6"[\s\S]*?<\/article>/.exec(therapies)![0]
+    expect(grounding).toContain('<a href="/ailments/2">Context-window claustrophobia</a>')
+
+    // Tokenia Tightwad has Context-window claustrophobia.
+    const { body } = await get(app, '/appointments/new?agent=5')
+    const group = /<optgroup label="Recommended for Tokenia Tightwad">([\s\S]*?)<\/optgroup>/.exec(body)![1]
+    expect([...group.matchAll(/<option value="(\d+)"/g)].map((m) => m[1]).sort()).toEqual(['1', '3', '6'])
+  })
+
+  it('shows the page again with a 400 when no therapy, or an unknown one, is chosen', async () => {
+    const { app, db } = testApp()
+    for (const [therapy, message] of [
+      ['', 'Choose a therapy to add.'],
+      ['999', 'Choose a therapy from the list.'],
+      ['detox', 'Choose a therapy from the list.'],
+    ]) {
+      const { status, body } = await post(app, '/ailments/1/therapies', { therapy })
+      expect(status, therapy).toBe(400)
+      expect(body).toContain(`<a href="#therapy">${message}</a>`)
+      expect(body).toContain(`<small id="therapy-error">${message}</small>`)
+    }
+    expect(therapyNames(db, 1)).toEqual(['Clarifying-questions coaching', 'Token detox'])
+  })
+
+  it('unlinks a therapy and redirects with a notice; unlinking it again changes nothing', async () => {
+    const { app, db } = testApp()
+    for (let i = 0; i < 2; i++) {
+      const { status, location } = await post(app, '/ailments/1/therapies/1/remove')
+      expect(status).toBe(303)
+      expect(location).toBe('/ailments/1?notice=therapy-removed')
+    }
+    expect(therapyNames(db, 1)).toEqual(['Clarifying-questions coaching'])
+    expect((await get(app, '/ailments/1?notice=therapy-removed')).body).toContain(
+      'Therapy removed from the treatment plan.',
+    )
+  })
+
+  it('returns 404 for an unknown ailment or therapy', async () => {
+    const { app } = testApp()
+    expect((await post(app, '/ailments/999/therapies', { therapy: '1' })).status).toBe(404)
+    expect((await post(app, '/ailments/999/therapies/1/remove')).status).toBe(404)
+    expect((await post(app, '/ailments/1/therapies/999/remove')).status).toBe(404)
   })
 })

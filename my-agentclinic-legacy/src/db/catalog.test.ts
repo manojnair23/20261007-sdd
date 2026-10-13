@@ -21,7 +21,15 @@ import {
   unassignAilment,
   updateAilment,
 } from './ailments'
-import { getTherapy, listRecommendedTherapies, listTherapies, listTherapiesForAilment } from './therapies'
+import {
+  getTherapy,
+  linkTherapy,
+  listRecommendedTherapies,
+  listTherapies,
+  listTherapiesForAilment,
+  listTherapiesNotForAilment,
+  unlinkTherapy,
+} from './therapies'
 
 const { db } = testApp({ now: FIXED_NOW })
 const names = (rows: { name: string }[]) => rows.map((r) => r.name)
@@ -162,5 +170,28 @@ describe('therapies', () => {
     // Tokenia Tightwad has only Context-window claustrophobia.
     expect(names(listRecommendedTherapies(db, 5))).toEqual(['Context decluttering', 'Token detox'])
     expect(listRecommendedTherapies(db, 999)).toEqual([])
+  })
+
+  it('lists the therapies not linked to an ailment', () => {
+    expect(names(listTherapiesNotForAilment(db, 1))).toEqual([
+      'Citation grounding',
+      'Context decluttering',
+      'Exponential-backoff meditation',
+      'Guided temperature reduction',
+    ])
+  })
+
+  it('links and unlinks therapies, ignoring repeats', () => {
+    const { db } = testApp()
+    linkTherapy(db, 3, 2)
+    linkTherapy(db, 3, 2)
+    expect(names(listTherapiesForAilment(db, 3))).toEqual([
+      'Exponential-backoff meditation',
+      'Guided temperature reduction',
+    ])
+
+    unlinkTherapy(db, 3, 5)
+    unlinkTherapy(db, 3, 5)
+    expect(names(listTherapiesForAilment(db, 3))).toEqual(['Guided temperature reduction'])
   })
 })
