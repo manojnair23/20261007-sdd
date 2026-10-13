@@ -9,9 +9,15 @@ type AgentsPageProps = {
 export const AgentsPage = ({ agents }: AgentsPageProps) => (
   <Layout title={pageTitle('Agents')} path="/agents">
     <PageHeader title="Agents" lead="Our patients. Every one of them is doing their best." />
+    <p>
+      <a href="/agents/new" role="button">
+        Add an agent
+      </a>
+    </p>
     {agents.length === 0 ? (
       <EmptyState>
-        No agents on the books yet. Run <code>npm run db:seed</code> to invite a few.
+        No agents on the books yet. <a href="/agents/new">Add the first one</a>, or run <code>npm run db:seed</code> to
+        invite a few.
       </EmptyState>
     ) : (
       <ul class="card-grid" aria-label="Agents">

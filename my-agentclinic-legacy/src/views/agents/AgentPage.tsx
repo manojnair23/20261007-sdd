@@ -1,16 +1,22 @@
 import type { Agent } from '../../db/agents'
 import type { Ailment } from '../../db/ailments'
-import { EmptyState, PageHeader } from '../components'
+import { EmptyState, Notice, PageHeader } from '../components'
 import { Layout, pageTitle } from '../Layout'
+
+export const AGENT_NOTICES = {
+  created: 'Agent added. Welcome to the clinic.',
+} as const
 
 type AgentPageProps = {
   agent: Agent
   ailments: Ailment[]
+  notice?: keyof typeof AGENT_NOTICES
 }
 
-export const AgentPage = ({ agent, ailments }: AgentPageProps) => (
+export const AgentPage = ({ agent, ailments, notice }: AgentPageProps) => (
   <Layout title={pageTitle(agent.name)} path={`/agents/${agent.id}`}>
     <PageHeader title={agent.name} lead={agent.model} />
+    <Notice message={notice && AGENT_NOTICES[notice]} />
     <p>{agent.bio}</p>
 
     <section aria-labelledby="ailments-heading">

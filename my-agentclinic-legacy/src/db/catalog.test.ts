@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { FIXED_NOW, testApp } from '../test/testApp'
-import { getAgent, listAgents } from './agents'
+import { agentNameTaken, createAgent, getAgent, listAgents } from './agents'
 import { getAilment, listAgentsWithAilment, listAilments, listAilmentsForAgent } from './ailments'
 import { getTherapy, listRecommendedTherapies, listTherapies, listTherapiesForAilment } from './therapies'
 
@@ -21,6 +21,26 @@ describe('agents', () => {
   it('gets one agent, or undefined', () => {
     expect(getAgent(db, 1)).toMatchObject({ id: 1, name: 'GPT-Overthinker', model: 'General-purpose language model' })
     expect(getAgent(db, 999)).toBeUndefined()
+  })
+
+  it('creates an agent and returns its new id', () => {
+    const { db } = testApp()
+    const agent = {
+      name: 'Embedding Edna',
+      model: 'Embedding model',
+      bio: 'Feels close to everyone, in 1,536 dimensions.',
+    }
+    const id = createAgent(db, agent)
+    expect(id).toBe(6)
+    expect(getAgent(db, id)).toEqual({ id, ...agent })
+  })
+
+  it('knows when a name is taken, ignoring case, and can skip one agent', () => {
+    expect(agentNameTaken(db, 'GPT-Overthinker')).toBe(true)
+    expect(agentNameTaken(db, 'gpt-overTHINKER')).toBe(true)
+    expect(agentNameTaken(db, 'GPT-Underthinker')).toBe(false)
+    expect(agentNameTaken(db, 'GPT-Overthinker', 1)).toBe(false)
+    expect(agentNameTaken(db, 'GPT-Overthinker', 2)).toBe(true)
   })
 })
 
