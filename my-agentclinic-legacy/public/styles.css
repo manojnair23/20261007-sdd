@@ -1,0 +1,394 @@
+@import url("layout.css");
+
+/* PicoCSS (/pico.min.css, linked first) provides the reset, typography, links,
+   container, and cards. This file maps the brand onto Pico's variables and keeps
+   only what Pico doesn't cover. */
+
+/* ---------- Brand tokens on Pico variables ---------- */
+/* :root[data-theme] matches the specificity of Pico's own light-theme selector, and this file loads later. */
+:root[data-theme="light"] {
+  /* Brand: orange and black. Black carries buttons and the header; orange is the accent. */
+  --color-primary: #111111;
+  --color-primary-dark: #000000;
+  --color-accent: #f97316; /* decoration only (borders, fills): 2.7:1 on the page background */
+  --color-accent-text: #c2410c; /* orange for text and links: 5.0:1 on the page background */
+  --color-accent-text-dark: #9a3412; /* link hover: 7.1:1 on the page background */
+  --color-text: #1c1917;
+  --font-heading: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+
+  --pico-font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --pico-background-color: #fafaf9;
+  --pico-color: var(--color-text);
+  --pico-muted-color: #57534e; /* 7.3:1 on the page background */
+  --pico-muted-border-color: #e7e5e4;
+  --pico-h1-color: var(--color-text);
+  --pico-h2-color: var(--color-text);
+  --pico-h3-color: var(--color-text);
+  --pico-h4-color: var(--color-text);
+  --pico-h5-color: var(--color-text);
+  --pico-h6-color: var(--color-text);
+
+  /* Links are orange so they stand out from black body text; buttons are black with white text. */
+  --pico-primary: var(--color-accent-text);
+  --pico-primary-background: var(--color-primary);
+  --pico-primary-underline: rgb(194 65 12 / 0.5);
+  --pico-primary-hover: var(--color-accent-text-dark);
+  --pico-primary-hover-background: var(--color-primary-dark);
+  --pico-primary-focus: rgb(249 115 22 / 0.35);
+  --focus-ring: var(--color-accent-text);
+
+  --pico-card-background-color: #ffffff;
+  --pico-border-radius: 0.75rem;
+}
+
+/* ---------- Page shell ---------- */
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- Focus ---------- */
+/* Pico's translucent focus shadow is too faint (about 1.6:1), so add a solid outline for keyboard users. */
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* ---------- Typography ---------- */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+}
+
+h1 {
+  font-size: clamp(2rem, 5vw + 1rem, 3.25rem);
+}
+
+/* ---------- Home page ---------- */
+.hero {
+  text-align: center;
+}
+
+.hero__tagline {
+  color: var(--color-accent-text);
+  font-size: clamp(1.1rem, 1.5vw + 0.8rem, 1.375rem);
+  font-weight: 600;
+}
+
+.intro {
+  max-width: 40rem;
+  margin-inline: auto;
+  color: var(--pico-muted-color);
+  font-size: 1.0625rem;
+  text-align: center;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--pico-spacing);
+  margin-top: calc(var(--pico-spacing) * 2);
+}
+
+@media (min-width: 40rem) {
+  .cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.cards > article {
+  margin-bottom: 0;
+  border-top: 4px solid var(--color-accent);
+}
+
+.cards > article p:last-child {
+  margin-bottom: 0;
+}
+
+/* ---------- Shared page pieces ---------- */
+:root[data-theme="light"] {
+  --color-success-bg: #e6f4ea;
+  --color-success-text: #1e4d2b; /* 8.6:1 on its background */
+  --color-error-bg: #fdecea;
+  --color-error-text: #7a1f1a; /* 9.0:1 on its background */
+}
+
+/* Visible only when focused, so keyboard users can jump past the nav. */
+.skip-link {
+  position: absolute;
+  left: var(--pico-spacing);
+  top: -10rem;
+  z-index: 10;
+  padding: 0.75rem 1rem;
+  background: var(--pico-card-background-color);
+  border-radius: var(--pico-border-radius);
+}
+
+.skip-link:focus {
+  top: var(--pico-spacing);
+}
+
+.page-header {
+  margin-bottom: calc(var(--pico-spacing) * 1.5);
+}
+
+.muted {
+  color: var(--pico-muted-color);
+}
+
+.empty-state {
+  padding: var(--pico-spacing);
+  border: 1px dashed var(--pico-muted-border-color);
+  border-radius: var(--pico-border-radius);
+  color: var(--pico-muted-color);
+}
+
+.notice {
+  margin-bottom: var(--pico-spacing);
+  padding: 0.75rem 1rem;
+  border-left: 4px solid var(--color-success-text);
+  border-radius: var(--pico-border-radius);
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+  font-weight: 600;
+}
+
+.error-summary {
+  margin-bottom: calc(var(--pico-spacing) * 1.5);
+  padding: var(--pico-spacing);
+  border: 2px solid var(--color-error-text);
+  border-radius: var(--pico-border-radius);
+  background: var(--color-error-bg);
+  color: var(--color-error-text);
+}
+
+.error-summary h2 {
+  margin-bottom: 0.5rem;
+  color: var(--color-error-text);
+  font-size: 1.125rem;
+}
+
+.error-summary ul {
+  margin-bottom: 0;
+}
+
+.error-summary a {
+  color: var(--color-error-text);
+  text-decoration: underline;
+}
+
+/* ---------- Card grids ---------- */
+.card-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--pico-spacing);
+  padding: 0;
+  list-style: none;
+}
+
+.card-grid > li {
+  list-style: none;
+}
+
+.card-grid article {
+  height: 100%;
+  margin-bottom: 0;
+}
+
+.card-grid h2,
+.card-grid h3 {
+  margin-bottom: 0.5rem;
+  font-size: 1.25rem;
+}
+
+.card-grid p:last-child {
+  margin-bottom: 0;
+}
+
+@media (min-width: 40rem) {
+  .card-grid {
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  }
+}
+
+.two-up {
+  display: grid;
+  gap: var(--pico-spacing);
+}
+
+@media (min-width: 40rem) {
+  .two-up {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* ---------- Stat cards ---------- */
+.stats {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--pico-spacing);
+  margin-bottom: calc(var(--pico-spacing) * 2);
+  padding: 0;
+}
+
+.stats > li {
+  list-style: none;
+}
+
+.stats a {
+  display: block;
+  padding: var(--pico-spacing);
+  border-top: 4px solid var(--color-accent);
+  border-radius: var(--pico-border-radius);
+  background: var(--pico-card-background-color);
+  box-shadow: var(--pico-card-box-shadow);
+  color: var(--pico-color);
+  text-decoration: none;
+}
+
+.stats strong {
+  display: block;
+  color: var(--color-primary);
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 4vw + 1rem, 2.75rem);
+  line-height: 1.1;
+}
+
+@media (min-width: 40rem) {
+  .stats {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ---------- Actions and forms ---------- */
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.actions form {
+  margin: 0;
+}
+
+.actions button,
+.actions [role="button"] {
+  width: auto;
+  min-height: 44px;
+  margin: 0;
+}
+
+.narrow {
+  max-width: 32rem;
+}
+
+.details {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.25rem var(--pico-spacing);
+}
+
+.details dt {
+  font-weight: 600;
+}
+
+.details dd {
+  margin: 0;
+}
+
+/* ---------- Tables that stack on phones ---------- */
+/* Mobile first: each row is a card with labelled cells; from 40rem it's a normal table. */
+table.stack caption {
+  padding-bottom: 0.5rem;
+  color: var(--pico-muted-color);
+  text-align: left;
+}
+
+table.stack thead {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+table.stack,
+table.stack tbody,
+table.stack tr,
+table.stack th,
+table.stack td {
+  display: block;
+}
+
+table.stack tr {
+  margin-bottom: var(--pico-spacing);
+  padding: 0.75rem var(--pico-spacing);
+  border: 1px solid var(--pico-muted-border-color);
+  border-radius: var(--pico-border-radius);
+  background: var(--pico-card-background-color);
+}
+
+table.stack th,
+table.stack td {
+  padding: 0.25rem 0;
+  border: 0;
+  background: transparent;
+}
+
+table.stack [data-label]::before {
+  content: attr(data-label) ": ";
+  font-weight: 600;
+}
+
+table.stack td[data-label="Actions"]::before {
+  content: none;
+}
+
+@media (min-width: 40rem) {
+  table.stack {
+    display: table;
+  }
+
+  table.stack thead {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+    white-space: normal;
+  }
+
+  table.stack thead {
+    display: table-header-group;
+  }
+
+  table.stack tbody {
+    display: table-row-group;
+  }
+
+  table.stack tr {
+    display: table-row;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  table.stack th,
+  table.stack td {
+    display: table-cell;
+    padding: var(--pico-spacing);
+    border-bottom: 1px solid var(--pico-muted-border-color);
+  }
+
+  table.stack [data-label]::before {
+    content: none;
+  }
+}

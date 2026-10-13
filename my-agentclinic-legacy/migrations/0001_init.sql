@@ -1,0 +1,2 @@
+-- Intentionally empty: proves the migration runner end to end.
+-- Phase 2 adds the first real tables in 0002 onward.

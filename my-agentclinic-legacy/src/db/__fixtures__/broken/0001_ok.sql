@@ -1,0 +1,1 @@
+CREATE TABLE patients (id INTEGER PRIMARY KEY);
