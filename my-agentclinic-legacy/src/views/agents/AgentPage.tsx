@@ -5,6 +5,7 @@ import { Layout, pageTitle } from '../Layout'
 
 export const AGENT_NOTICES = {
   created: 'Agent added. Welcome to the clinic.',
+  updated: 'Details saved. A fresh start.',
 } as const
 
 type AgentPageProps = {
@@ -40,6 +41,9 @@ export const AgentPage = ({ agent, ailments, notice }: AgentPageProps) => (
       </a>
       <a href={`/agents/${agent.id}/dashboard`} role="button" class="secondary outline">
         {agent.name}'s dashboard
+      </a>
+      <a href={`/agents/${agent.id}/edit`} role="button" class="secondary outline">
+        Edit details
       </a>
     </div>
   </Layout>

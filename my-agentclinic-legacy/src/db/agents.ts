@@ -33,3 +33,11 @@ export function agentNameTaken(db: Db, name: string, ignoreId?: number): boolean
     .get(name, ignoreId ?? null)
   return row !== undefined
 }
+
+/** Saves an agent's fields. Returns false when there's no agent with that id. */
+export function updateAgent(db: Db, id: number, agent: AgentInput): boolean {
+  const { changes } = db
+    .prepare('UPDATE agents SET name = @name, model = @model, bio = @bio WHERE id = @id')
+    .run({ ...agent, id })
+  return changes > 0
+}

@@ -13,7 +13,7 @@ The phase is done when every box below is ticked. Tick each slice's boxes as it'
 - [x] **6.1** A cross-origin POST returns 403 with the friendly page and changes nothing. A POST with no `Origin` and no `Sec-Fetch-Site` returns 403. A same-origin POST works. GETs aren't checked.
 - [x] **6.2** The validation helpers have unit tests. The booking form's HTML is unchanged (the existing tests pass without edits).
 - [x] **6.3** Creating an agent: 303 to the new agent with the "created" notice. Each field rule returns 400, keeps the values, and links the error summary to the field. A duplicate name in a different case is refused.
-- [ ] **6.4** Editing an agent: saving without changes works, renaming to another agent's name is refused, and an unknown id returns 404.
+- [x] **6.4** Editing an agent: saving without changes works, renaming to another agent's name is refused, and an unknown id returns 404.
 - [ ] **6.5** Assigning and unassigning ailments works and is idempotent. An unknown ailment in the body returns 400. The booking form's recommended therapies follow the change.
 - [ ] **6.6** Deleting an agent with no appointments removes the agent and their ailment links. An agent with any appointment returns 409 on both GET and POST, and the database doesn't change.
 - [ ] **6.7** Creating and editing an ailment follows the same rules as agents.

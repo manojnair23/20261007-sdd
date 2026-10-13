@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { FIXED_NOW, testApp } from '../test/testApp'
-import { agentNameTaken, createAgent, getAgent, listAgents } from './agents'
+import { agentNameTaken, createAgent, getAgent, listAgents, updateAgent } from './agents'
 import { getAilment, listAgentsWithAilment, listAilments, listAilmentsForAgent } from './ailments'
 import { getTherapy, listRecommendedTherapies, listTherapies, listTherapiesForAilment } from './therapies'
 
@@ -33,6 +33,14 @@ describe('agents', () => {
     const id = createAgent(db, agent)
     expect(id).toBe(6)
     expect(getAgent(db, id)).toEqual({ id, ...agent })
+  })
+
+  it('updates an agent, and reports an unknown id', () => {
+    const { db } = testApp()
+    const changes = { name: 'GPT-Underthinker', model: 'Small language model', bio: 'Now answers in one word.' }
+    expect(updateAgent(db, 1, changes)).toBe(true)
+    expect(getAgent(db, 1)).toEqual({ id: 1, ...changes })
+    expect(updateAgent(db, 999, changes)).toBe(false)
   })
 
   it('knows when a name is taken, ignoring case, and can skip one agent', () => {

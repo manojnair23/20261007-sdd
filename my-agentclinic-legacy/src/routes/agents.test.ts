@@ -73,3 +73,65 @@ describe('adding an agent', () => {
     expect((await get(app, '/agents/1?notice=toString')).body).toContain('<div role="status"></div>')
   })
 })
+
+describe('editing an agent', () => {
+  const loopy = getAgent(testApp().db, 3)!
+  const { name, model, bio } = loopy
+
+  it('links to the form from the agent page', async () => {
+    const { app } = testApp()
+    expect((await get(app, '/agents/3')).body).toContain(
+      '<a href="/agents/3/edit" role="button" class="secondary outline">Edit details</a>',
+    )
+  })
+
+  it("shows the form filled in with the agent's details", async () => {
+    const { app } = testApp()
+    const { status, body } = await get(app, '/agents/3/edit')
+    expect(status).toBe(200)
+    expect(body).toContain('<h1>Edit Loopy McRetry</h1>')
+    expect(body).toContain('<form method="post" action="/agents/3/edit" novalidate="" class="narrow">')
+    expect(body).toContain('id="name" name="name" value="Loopy McRetry"')
+    expect(body).toContain('id="model" name="model" value="Autonomous coding agent"')
+    expect(body).toContain(
+      '>Has re-run the same failing test 300 times. Is fairly sure the 301st run will pass.</textarea>',
+    )
+    expect(body).toContain('<a href="/agents/3" role="button" class="secondary outline">Cancel</a>')
+  })
+
+  it('saves the changes and redirects to the agent with a notice', async () => {
+    const { app, db } = testApp()
+    const changes = { name: 'Loopy McRetry II', model: 'Autonomous coding agent', bio: 'Passed on the 301st run.' }
+    const { status, location } = await post(app, '/agents/3/edit', changes)
+    expect(status).toBe(303)
+    expect(location).toBe('/agents/3?notice=updated')
+    expect(getAgent(db, 3)).toEqual({ id: 3, ...changes })
+    expect((await get(app, location!)).body).toContain(
+      '<div role="status" class="notice">Details saved. A fresh start.</div>',
+    )
+  })
+
+  it('saves without changes, since an agent may keep their own name', async () => {
+    const { app, db } = testApp()
+    expect((await post(app, '/agents/3/edit', { name, model, bio })).status).toBe(303)
+    expect(getAgent(db, 3)).toEqual(loopy)
+  })
+
+  it("refuses another agent's name with a 400, keeping the saved name in the title, and saves nothing", async () => {
+    const { app, db } = testApp()
+    const { status, body } = await post(app, '/agents/3/edit', { name: 'prompta vague', model, bio: '' })
+    expect(status).toBe(400)
+    expect(body).toContain('<h1>Edit Loopy McRetry</h1>')
+    expect(body).toContain('There&#39;s already an agent called prompta vague. Choose another name.')
+    expect(body).toContain('<a href="#bio">Enter a bio.</a>')
+    expect(body).toContain('value="prompta vague"')
+    expect(getAgent(db, 3)).toEqual(loopy)
+  })
+
+  it('returns 404 for an unknown agent', async () => {
+    const { app } = testApp()
+    expect((await get(app, '/agents/999/edit')).status).toBe(404)
+    expect((await post(app, '/agents/999/edit', { name: 'x', model: 'y', bio: 'z' })).status).toBe(404)
+    expect((await get(app, '/agents/abc/edit')).status).toBe(404)
+  })
+})
