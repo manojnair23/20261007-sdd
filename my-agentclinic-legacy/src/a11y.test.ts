@@ -32,6 +32,7 @@ const pages = async () => {
   const invalid = await post(app, '/appointments/new', { agent: '', therapy: '', startsAt: '' })
   const invalidAgent = await post(app, '/agents/new', {})
   const invalidEdit = await post(app, '/agents/1/edit', {})
+  const invalidAilment = await post(app, '/agents/1/ailments', {})
   // And the page a cross-origin form post gets from the CSRF check.
   const forbidden = await post(app, '/appointments/new', {}, { headers: { Origin: 'https://evil.example' } })
   return [
@@ -39,6 +40,12 @@ const pages = async () => {
     { path: 'POST /appointments/new (invalid)', expected: 400, status: invalid.status, body: invalid.body },
     { path: 'POST /agents/new (invalid)', expected: 400, status: invalidAgent.status, body: invalidAgent.body },
     { path: 'POST /agents/1/edit (invalid)', expected: 400, status: invalidEdit.status, body: invalidEdit.body },
+    {
+      path: 'POST /agents/1/ailments (invalid)',
+      expected: 400,
+      status: invalidAilment.status,
+      body: invalidAilment.body,
+    },
     { path: 'POST /appointments/new (cross-origin)', expected: 403, status: forbidden.status, body: forbidden.body },
   ]
 }

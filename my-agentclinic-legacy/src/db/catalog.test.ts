@@ -1,7 +1,15 @@
 import { describe, expect, it } from 'vitest'
 import { FIXED_NOW, testApp } from '../test/testApp'
 import { agentNameTaken, createAgent, getAgent, listAgents, updateAgent } from './agents'
-import { getAilment, listAgentsWithAilment, listAilments, listAilmentsForAgent } from './ailments'
+import {
+  assignAilment,
+  getAilment,
+  listAgentsWithAilment,
+  listAilments,
+  listAilmentsForAgent,
+  listAilmentsNotForAgent,
+  unassignAilment,
+} from './ailments'
 import { getTherapy, listRecommendedTherapies, listTherapies, listTherapiesForAilment } from './therapies'
 
 const { db } = testApp({ now: FIXED_NOW })
@@ -64,6 +72,27 @@ describe('ailments', () => {
     expect(names(listAgentsWithAilment(db, 1))).toEqual(['GPT-Overthinker', 'Loopy McRetry', 'Prompta Vague'])
     expect(getAilment(db, 2)?.name).toBe('Context-window claustrophobia')
     expect(getAilment(db, 999)).toBeUndefined()
+  })
+
+  it("lists the ailments an agent doesn't have", () => {
+    expect(names(listAilmentsNotForAgent(db, 1))).toEqual([
+      'Context-window claustrophobia',
+      'Hallucination anxiety',
+      'Retry-loop syndrome',
+      'Temperature dysregulation',
+    ])
+  })
+
+  it('assigns and unassigns ailments, ignoring repeats', () => {
+    const { db } = testApp()
+    assignAilment(db, 5, 5)
+    assignAilment(db, 5, 5)
+    expect(names(listAilmentsForAgent(db, 5))).toEqual(['Context-window claustrophobia', 'Hallucination anxiety'])
+
+    unassignAilment(db, 5, 2)
+    unassignAilment(db, 5, 2)
+    expect(names(listAilmentsForAgent(db, 5))).toEqual(['Hallucination anxiety'])
+    expect(names(listAilmentsNotForAgent(db, 5))).toHaveLength(5)
   })
 })
 

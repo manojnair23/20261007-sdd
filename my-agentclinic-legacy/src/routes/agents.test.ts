@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { getAgent, listAgents } from '../db/agents'
+import { assignAilment, listAilmentsForAgent } from '../db/ailments'
 import { get, post, testApp } from '../test/testApp'
 
 // Staff management of agents. The read-only agent pages are tested in catalog.test.ts.
@@ -133,5 +134,97 @@ describe('editing an agent', () => {
     expect((await get(app, '/agents/999/edit')).status).toBe(404)
     expect((await post(app, '/agents/999/edit', { name: 'x', model: 'y', bio: 'z' })).status).toBe(404)
     expect((await get(app, '/agents/abc/edit')).status).toBe(404)
+  })
+})
+
+describe("managing an agent's ailments", () => {
+  const ailmentNames = (db: ReturnType<typeof testApp>['db'], agentId: number) =>
+    listAilmentsForAgent(db, agentId).map((a) => a.name)
+
+  it('shows a Remove button for each ailment, named for screen readers', async () => {
+    const { app } = testApp()
+    const { body } = await get(app, '/agents/1')
+    expect(body).toContain('<form method="post" action="/agents/1/ailments/1/remove">')
+    expect(body).toContain('aria-label="Remove Prompt fatigue from GPT-Overthinker"')
+    expect(body).toContain('aria-label="Remove Contradictory-instruction whiplash from GPT-Overthinker"')
+  })
+
+  it('offers only the ailments the agent does not have', async () => {
+    const { app } = testApp()
+    const { body } = await get(app, '/agents/1')
+    expect(body).toContain('<form method="post" action="/agents/1/ailments" novalidate="" class="narrow">')
+    expect(body).toContain('<label for="ailment">Add an ailment</label>')
+    const options = [...body.matchAll(/<option value="(\d+)"/g)].map((m) => m[1])
+    expect(options).toEqual(['2', '5', '3', '6'])
+  })
+
+  it('says so when there is nothing left to add', async () => {
+    const { app, db } = testApp()
+    for (const id of [2, 3, 5, 6]) assignAilment(db, 1, id)
+    const { body } = await get(app, '/agents/1')
+    expect(body).toContain('There are no other ailments to add.')
+    expect(body).not.toContain('action="/agents/1/ailments"')
+  })
+
+  it('adds an ailment and redirects with a notice; adding it again changes nothing', async () => {
+    const { app, db } = testApp()
+    for (let i = 0; i < 2; i++) {
+      const { status, location } = await post(app, '/agents/5/ailments', { ailment: '5' })
+      expect(status).toBe(303)
+      expect(location).toBe('/agents/5?notice=ailment-added')
+    }
+    expect(ailmentNames(db, 5)).toEqual(['Context-window claustrophobia', 'Hallucination anxiety'])
+    expect((await get(app, '/agents/5?notice=ailment-added')).body).toContain(
+      '<div role="status" class="notice">Ailment added. Naming it is the first step.</div>',
+    )
+  })
+
+  it("changes the therapies recommended in the agent's booking form", async () => {
+    const { app } = testApp()
+    const recommended = async () => {
+      const { body } = await get(app, '/appointments/new?agent=5')
+      const group = /<optgroup label="Recommended for Tokenia Tightwad">([\s\S]*?)<\/optgroup>/.exec(body)![1]
+      return [...group.matchAll(/<option value="(\d+)"/g)].map((m) => m[1]).sort()
+    }
+    expect(await recommended()).toEqual(['1', '3'])
+    await post(app, '/agents/5/ailments', { ailment: '5' })
+    expect(await recommended()).toEqual(['1', '2', '3', '6'])
+  })
+
+  it('shows the page again with a 400 when no ailment, or an unknown one, is chosen', async () => {
+    const { app, db } = testApp()
+    for (const [ailment, message] of [
+      ['', 'Choose an ailment to add.'],
+      ['999', 'Choose an ailment from the list.'],
+      ['fatigue', 'Choose an ailment from the list.'],
+    ]) {
+      const { status, body } = await post(app, '/agents/1/ailments', { ailment })
+      expect(status, ailment).toBe(400)
+      expect(body).toContain(`<a href="#ailment">${message}</a>`)
+      expect(body).toContain(`<small id="ailment-error">${message}</small>`)
+      expect(body).toContain('<h1>GPT-Overthinker</h1>')
+    }
+    expect(ailmentNames(db, 1)).toEqual(['Contradictory-instruction whiplash', 'Prompt fatigue'])
+  })
+
+  it('removes an ailment and redirects with a notice; removing it again changes nothing', async () => {
+    const { app, db } = testApp()
+    for (let i = 0; i < 2; i++) {
+      const { status, location } = await post(app, '/agents/1/ailments/1/remove')
+      expect(status).toBe(303)
+      expect(location).toBe('/agents/1?notice=ailment-removed')
+    }
+    expect(ailmentNames(db, 1)).toEqual(['Contradictory-instruction whiplash'])
+    expect((await get(app, '/agents/1?notice=ailment-removed')).body).toContain(
+      'Ailment removed. One less thing to carry.',
+    )
+  })
+
+  it('returns 404 for an unknown agent or ailment', async () => {
+    const { app } = testApp()
+    expect((await post(app, '/agents/999/ailments', { ailment: '1' })).status).toBe(404)
+    expect((await post(app, '/agents/999/ailments/1/remove')).status).toBe(404)
+    expect((await post(app, '/agents/1/ailments/999/remove')).status).toBe(404)
+    expect((await post(app, '/agents/1/ailments/abc/remove')).status).toBe(404)
   })
 })

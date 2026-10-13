@@ -1,12 +1,18 @@
-import { Hono } from 'hono'
+import { Hono, type Context } from 'hono'
 import { validateAgent } from '../agents/validate'
 import { createAgent, getAgent, listAgents, updateAgent, type Agent } from '../db/agents'
-import { listAilmentsForAgent } from '../db/ailments'
+import {
+  assignAilment,
+  getAilment,
+  listAilmentsForAgent,
+  listAilmentsNotForAgent,
+  unassignAilment,
+} from '../db/ailments'
 import { agentDashboard } from '../db/dashboard'
 import { ID, nowSlot, type AppDeps } from '../deps'
-import { formText } from '../validation'
+import { formText, parseId } from '../validation'
 import { AgentForm } from '../views/agents/AgentForm'
-import { AGENT_NOTICES, AgentPage } from '../views/agents/AgentPage'
+import { AGENT_NOTICES, AgentPage, type AgentPageProps } from '../views/agents/AgentPage'
 import { AgentsPage } from '../views/agents/AgentsPage'
 import { noticeKey } from '../views/components'
 import { AgentDashboardPage } from '../views/dashboard/AgentDashboardPage'
@@ -50,17 +56,45 @@ export function agentRoutes(deps: AppDeps) {
     return c.redirect(`/agents/${id}?notice=created`, 303)
   })
 
-  routes.get(`/${ID}`, (c) => {
-    const id = Number(c.req.param('id'))
-    const agent = getAgent(db, id)
-    if (!agent) return c.notFound()
-    return c.html(
+  const agentPage = (c: Context, agent: Agent, extra: Pick<AgentPageProps, 'notice' | 'addAilment'>) =>
+    c.html(
       <AgentPage
         agent={agent}
-        ailments={listAilmentsForAgent(db, id)}
-        notice={noticeKey(AGENT_NOTICES, c.req.query('notice'))}
+        ailments={listAilmentsForAgent(db, agent.id)}
+        unassigned={listAilmentsNotForAgent(db, agent.id)}
+        {...extra}
       />,
+      extra.addAilment ? 400 : 200,
     )
+
+  routes.get(`/${ID}`, (c) => {
+    const agent = getAgent(db, Number(c.req.param('id')))
+    if (!agent) return c.notFound()
+    return agentPage(c, agent, { notice: noticeKey(AGENT_NOTICES, c.req.query('notice')) })
+  })
+
+  routes.post(`/${ID}/ailments`, async (c) => {
+    const agent = getAgent(db, Number(c.req.param('id')))
+    if (!agent) return c.notFound()
+
+    const value = formText(await c.req.parseBody(), 'ailment').trim()
+    const ailmentId = parseId(value)
+    if (!value) return agentPage(c, agent, { addAilment: { value, error: 'Choose an ailment to add.' } })
+    if (ailmentId === undefined || !getAilment(db, ailmentId)) {
+      return agentPage(c, agent, { addAilment: { value, error: 'Choose an ailment from the list.' } })
+    }
+
+    assignAilment(db, agent.id, ailmentId)
+    return c.redirect(`/agents/${agent.id}?notice=ailment-added`, 303)
+  })
+
+  routes.post(`/${ID}/ailments/:ailmentId{[0-9]+}/remove`, (c) => {
+    const agent = getAgent(db, Number(c.req.param('id')))
+    const ailment = getAilment(db, Number(c.req.param('ailmentId')))
+    if (!agent || !ailment) return c.notFound()
+
+    unassignAilment(db, agent.id, ailment.id)
+    return c.redirect(`/agents/${agent.id}?notice=ailment-removed`, 303)
   })
 
   routes.get(`/${ID}/edit`, (c) => {

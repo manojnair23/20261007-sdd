@@ -48,3 +48,25 @@ export function listAilmentsForAgent(db: Db, agentId: number): Ailment[] {
     )
     .all(agentId) as Ailment[]
 }
+
+/** Ailments the agent doesn't have yet, for the "add an ailment" list. */
+export function listAilmentsNotForAgent(db: Db, agentId: number): Ailment[] {
+  return db
+    .prepare(
+      `SELECT a.id, a.name, a.description
+       FROM ailments a
+       WHERE a.id NOT IN (SELECT ailment_id FROM agent_ailments WHERE agent_id = ?)
+       ORDER BY a.name`,
+    )
+    .all(agentId) as Ailment[]
+}
+
+/** Gives an agent an ailment. Assigning one they already have changes nothing. */
+export function assignAilment(db: Db, agentId: number, ailmentId: number): void {
+  db.prepare('INSERT OR IGNORE INTO agent_ailments (agent_id, ailment_id) VALUES (?, ?)').run(agentId, ailmentId)
+}
+
+/** Takes an ailment off an agent. Removing one they don't have changes nothing. */
+export function unassignAilment(db: Db, agentId: number, ailmentId: number): void {
+  db.prepare('DELETE FROM agent_ailments WHERE agent_id = ? AND ailment_id = ?').run(agentId, ailmentId)
+}
