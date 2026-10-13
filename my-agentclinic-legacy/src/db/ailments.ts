@@ -97,3 +97,9 @@ export function ailmentNameTaken(db: Db, name: string, ignoreId?: number): boole
     .get(name, ignoreId ?? null)
   return row !== undefined
 }
+
+/** Deletes an ailment and its links to agents and therapies. Ailments never block a delete. */
+export function deleteAilment(db: Db, id: number): 'ok' | 'not-found' {
+  const { changes } = db.prepare('DELETE FROM ailments WHERE id = ?').run(id)
+  return changes > 0 ? 'ok' : 'not-found'
+}

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { getAilment, listAilments } from '../db/ailments'
-import { linkTherapy, listTherapiesForAilment } from '../db/therapies'
+import { listAgents } from '../db/agents'
+import { createAilment, getAilment, listAilments, listAilmentsForAgent } from '../db/ailments'
+import { getTherapy, linkTherapy, listTherapiesForAilment } from '../db/therapies'
 import { get, post, testApp } from '../test/testApp'
 
 // Staff management of ailments. The read-only ailment pages are tested in catalog.test.ts.
@@ -208,5 +209,69 @@ describe("managing an ailment's therapies", () => {
     expect((await post(app, '/ailments/999/therapies', { therapy: '1' })).status).toBe(404)
     expect((await post(app, '/ailments/999/therapies/1/remove')).status).toBe(404)
     expect((await post(app, '/ailments/1/therapies/999/remove')).status).toBe(404)
+  })
+})
+
+describe('deleting an ailment', () => {
+  it('links to the confirmation page from the ailment page', async () => {
+    const { app } = testApp()
+    expect((await get(app, '/ailments/1')).body).toContain(
+      '<a href="/ailments/1/delete" role="button" class="secondary outline">Delete ailment</a>',
+    )
+  })
+
+  it('asks first, saying which links go with it', async () => {
+    const { app, db } = testApp()
+    const { status, body } = await get(app, '/ailments/1/delete')
+    expect(status).toBe(200)
+    expect(body).toContain('<h1>Delete Prompt fatigue?</h1>')
+    expect(body).toContain(
+      'This removes Prompt fatigue from the clinic&#39;s records. 3 agents will no longer have it, and its 2 therapy links will go too. The agents and therapies themselves stay.',
+    )
+    expect(body).toContain('<form method="post" action="/ailments/1/delete" class="actions">')
+    expect(body).toContain('<a href="/ailments/1" role="button" class="secondary outline">Keep it</a>')
+    expect(getAilment(db, 1)).toBeDefined()
+  })
+
+  it('uses the singular, and says when nothing is linked', async () => {
+    const { app, db } = testApp()
+    // Retry-loop syndrome: one agent (Loopy McRetry) and one therapy.
+    expect((await get(app, '/ailments/3/delete')).body).toContain(
+      '1 agent will no longer have it, and its 1 therapy link will go too.',
+    )
+    const id = createAilment(db, newAilment)
+    expect((await get(app, `/ailments/${id}/delete`)).body).toContain(
+      'This removes Emoji overload from the clinic&#39;s records. Nothing else is linked to it.</p>',
+    )
+  })
+
+  it('deletes the ailment and its links, keeping the agents and therapies, then lists ailments with a notice', async () => {
+    const { app, db } = testApp()
+    const { status, location } = await post(app, '/ailments/1/delete')
+    expect(status).toBe(303)
+    expect(location).toBe('/ailments?notice=deleted')
+    expect(getAilment(db, 1)).toBeUndefined()
+    expect(listAilmentsForAgent(db, 1).map((a) => a.name)).toEqual(['Contradictory-instruction whiplash'])
+    expect(listAgents(db)).toHaveLength(5)
+    expect(getTherapy(db, 1)).toBeDefined()
+
+    const { body } = await get(app, location!)
+    expect(body).toContain(
+      '<div role="status" class="notice">Ailment removed from the records. One less thing to worry about.</div>',
+    )
+    expect(body).not.toContain('Prompt fatigue')
+  })
+
+  it('is never blocked, even for an ailment whose agents have appointments', async () => {
+    const { app } = testApp()
+    // GPT-Overthinker has an upcoming appointment and has ailment 4.
+    expect((await get(app, '/ailments/4/delete')).status).toBe(200)
+    expect((await post(app, '/ailments/4/delete')).status).toBe(303)
+  })
+
+  it('returns 404 for an unknown ailment', async () => {
+    const { app } = testApp()
+    expect((await get(app, '/ailments/999/delete')).status).toBe(404)
+    expect((await post(app, '/ailments/999/delete')).status).toBe(404)
   })
 })

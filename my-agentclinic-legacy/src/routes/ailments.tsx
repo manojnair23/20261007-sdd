@@ -2,6 +2,7 @@ import { Hono, type Context } from 'hono'
 import { validateAilment } from '../ailments/validate'
 import {
   createAilment,
+  deleteAilment,
   getAilment,
   listAgentsWithAilment,
   listAilments,
@@ -19,8 +20,9 @@ import { ID, type AppDeps } from '../deps'
 import { formText, parseId } from '../validation'
 import { AilmentForm } from '../views/ailments/AilmentForm'
 import { AILMENT_NOTICES, AilmentPage, type AilmentPageProps } from '../views/ailments/AilmentPage'
-import { AilmentsPage } from '../views/ailments/AilmentsPage'
-import { noticeKey } from '../views/components'
+import { AILMENTS_NOTICES, AilmentsPage } from '../views/ailments/AilmentsPage'
+import { countOf, noticeKey } from '../views/components'
+import { ConfirmDeletePage } from '../views/DeletePages'
 
 const NEW_AILMENT = {
   title: 'Add an ailment',
@@ -47,7 +49,9 @@ const ailmentInput = (body: Record<string, unknown>) => ({
 export function ailmentRoutes({ db }: AppDeps) {
   const routes = new Hono()
 
-  routes.get('/', (c) => c.html(<AilmentsPage ailments={listAilments(db)} />))
+  routes.get('/', (c) =>
+    c.html(<AilmentsPage ailments={listAilments(db)} notice={noticeKey(AILMENTS_NOTICES, c.req.query('notice'))} />),
+  )
 
   routes.get('/new', (c) => c.html(<AilmentForm {...NEW_AILMENT} values={{ name: '', description: '' }} />))
 
@@ -123,5 +127,38 @@ export function ailmentRoutes({ db }: AppDeps) {
     return c.redirect(`/ailments/${ailment.id}?notice=updated`, 303)
   })
 
+  routes.get(`/${ID}/delete`, (c) => {
+    const ailment = getAilment(db, Number(c.req.param('id')))
+    if (!ailment) return c.notFound()
+
+    const agents = listAgentsWithAilment(db, ailment.id).length
+    const therapies = listTherapiesForAilment(db, ailment.id).length
+    const effects = [
+      agents > 0 && `${countOf(agents, 'agent')} will no longer have it`,
+      therapies > 0 && `its ${countOf(therapies, 'therapy link')} will go too`,
+    ].filter(Boolean)
+    return c.html(
+      <ConfirmDeletePage
+        name={ailment.name}
+        action={`/ailments/${ailment.id}/delete`}
+        cancelHref={`/ailments/${ailment.id}`}
+      >
+        <p>
+          This removes {ailment.name} from the clinic's records.{' '}
+          {effects.length > 0
+            ? `${capitalize(effects.join(', and '))}. The agents and therapies themselves stay.`
+            : 'Nothing else is linked to it.'}
+        </p>
+      </ConfirmDeletePage>,
+    )
+  })
+
+  routes.post(`/${ID}/delete`, (c) => {
+    if (deleteAilment(db, Number(c.req.param('id'))) === 'not-found') return c.notFound()
+    return c.redirect('/ailments?notice=deleted', 303)
+  })
+
   return routes
 }
+
+const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1)

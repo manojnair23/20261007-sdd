@@ -13,6 +13,7 @@ import {
   ailmentNameTaken,
   assignAilment,
   createAilment,
+  deleteAilment,
   getAilment,
   listAgentsWithAilment,
   listAilments,
@@ -120,6 +121,17 @@ describe('ailments', () => {
     expect(updateAilment(db, id, changes)).toBe(true)
     expect(getAilment(db, id)).toEqual({ id, ...changes })
     expect(updateAilment(db, 999, changes)).toBe(false)
+  })
+
+  it('deletes an ailment with its agent and therapy links', () => {
+    const { db } = testApp()
+    expect(deleteAilment(db, 1)).toBe('ok')
+    expect(getAilment(db, 1)).toBeUndefined()
+    expect(listAgentsWithAilment(db, 1)).toEqual([])
+    expect(listTherapiesForAilment(db, 1)).toEqual([])
+    expect(db.prepare('SELECT count(*) AS n FROM agent_ailments WHERE ailment_id = 1').get()).toEqual({ n: 0 })
+    expect(db.prepare('SELECT count(*) AS n FROM ailment_therapies WHERE ailment_id = 1').get()).toEqual({ n: 0 })
+    expect(deleteAilment(db, 1)).toBe('not-found')
   })
 
   it('knows when an ailment name is taken, ignoring case, and can skip one ailment', () => {

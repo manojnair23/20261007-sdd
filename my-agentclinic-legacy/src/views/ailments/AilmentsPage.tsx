@@ -1,16 +1,22 @@
 import type { AilmentWithCount } from '../../db/ailments'
-import { EmptyState, PageHeader } from '../components'
+import { EmptyState, Notice, PageHeader } from '../components'
 import { Layout, pageTitle } from '../Layout'
+
+export const AILMENTS_NOTICES = {
+  deleted: 'Ailment removed from the records. One less thing to worry about.',
+} as const
 
 type AilmentsPageProps = {
   ailments: AilmentWithCount[]
+  notice?: keyof typeof AILMENTS_NOTICES
 }
 
 const agentsLabel = (count: number) => (count === 1 ? '1 agent affected' : `${count} agents affected`)
 
-export const AilmentsPage = ({ ailments }: AilmentsPageProps) => (
+export const AilmentsPage = ({ ailments, notice }: AilmentsPageProps) => (
   <Layout title={pageTitle('Ailments')} path="/ailments">
     <PageHeader title="Ailments" lead="What brings agents to the clinic. You are not alone." />
+    <Notice message={notice && AILMENTS_NOTICES[notice]} />
     <p>
       <a href="/ailments/new" role="button">
         Add an ailment

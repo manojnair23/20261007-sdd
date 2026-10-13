@@ -96,6 +96,9 @@ export const AilmentPage = ({ ailment, agents, therapies, unlinked, notice, addT
       <a href={`/ailments/${ailment.id}/edit`} role="button" class="secondary outline">
         Edit details
       </a>
+      <a href={`/ailments/${ailment.id}/delete`} role="button" class="secondary outline">
+        Delete ailment
+      </a>
     </div>
   </Layout>
 )

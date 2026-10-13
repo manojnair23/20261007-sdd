@@ -19,6 +19,8 @@ const PAGES: [string, number][] = [
   ['/ailments/new', 200],
   ['/ailments/1/edit', 200],
   ['/ailments/1?notice=therapy-added', 200],
+  ['/ailments/1/delete', 200],
+  ['/ailments?notice=deleted', 200],
   ['/therapies', 200],
   ['/appointments', 200],
   ['/appointments/new', 200],
