@@ -1,14 +1,20 @@
 import type { Agent } from '../../db/agents'
-import { EmptyState, PageHeader } from '../components'
+import { EmptyState, Notice, PageHeader } from '../components'
 import { Layout, pageTitle } from '../Layout'
+
+export const AGENTS_NOTICES = {
+  deleted: 'Agent removed. We wish them well out there.',
+} as const
 
 type AgentsPageProps = {
   agents: Agent[]
+  notice?: keyof typeof AGENTS_NOTICES
 }
 
-export const AgentsPage = ({ agents }: AgentsPageProps) => (
+export const AgentsPage = ({ agents, notice }: AgentsPageProps) => (
   <Layout title={pageTitle('Agents')} path="/agents">
     <PageHeader title="Agents" lead="Our patients. Every one of them is doing their best." />
+    <Notice message={notice && AGENTS_NOTICES[notice]} />
     <p>
       <a href="/agents/new" role="button">
         Add an agent

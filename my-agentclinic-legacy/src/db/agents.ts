@@ -41,3 +41,24 @@ export function updateAgent(db: Db, id: number, agent: AgentInput): boolean {
     .run({ ...agent, id })
   return changes > 0
 }
+
+/** How many appointments of any status the agent has. */
+export function countAppointmentsForAgent(db: Db, id: number): number {
+  const row = db.prepare('SELECT count(*) AS count FROM appointments WHERE agent_id = ?').get(id) as { count: number }
+  return row.count
+}
+
+export type DeleteResult = 'ok' | 'not-found' | 'has-appointments'
+
+/**
+ * Deletes an agent and their ailment links. Agents with any appointment (upcoming, past, or
+ * cancelled) are kept, so the schedule's history stays whole. Checks and deletes in one transaction.
+ */
+export function deleteAgent(db: Db, id: number): DeleteResult {
+  return db.transaction((): DeleteResult => {
+    if (!getAgent(db, id)) return 'not-found'
+    if (countAppointmentsForAgent(db, id) > 0) return 'has-appointments'
+    db.prepare('DELETE FROM agents WHERE id = ?').run(id)
+    return 'ok'
+  })()
+}

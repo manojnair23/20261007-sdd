@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import { FIXED_NOW, testApp } from '../test/testApp'
-import { agentNameTaken, createAgent, getAgent, listAgents, updateAgent } from './agents'
+import {
+  agentNameTaken,
+  countAppointmentsForAgent,
+  createAgent,
+  deleteAgent,
+  getAgent,
+  listAgents,
+  updateAgent,
+} from './agents'
 import {
   assignAilment,
   getAilment,
@@ -49,6 +57,22 @@ describe('agents', () => {
     expect(updateAgent(db, 1, changes)).toBe(true)
     expect(getAgent(db, 1)).toEqual({ id: 1, ...changes })
     expect(updateAgent(db, 999, changes)).toBe(false)
+  })
+
+  it('counts every appointment an agent has, whatever its status', () => {
+    expect([1, 2, 3, 4, 5].map((id) => countAppointmentsForAgent(db, id))).toEqual([1, 1, 1, 0, 1])
+  })
+
+  it('deletes an agent without appointments, with their ailment links, and keeps the rest', () => {
+    const { db } = testApp()
+    expect(deleteAgent(db, 4)).toBe('ok')
+    expect(getAgent(db, 4)).toBeUndefined()
+    expect(listAgentsWithAilment(db, 4).map((a) => a.id)).not.toContain(4)
+    expect(db.prepare('SELECT count(*) AS n FROM agent_ailments WHERE agent_id = 4').get()).toEqual({ n: 0 })
+
+    expect(deleteAgent(db, 3)).toBe('has-appointments')
+    expect(getAgent(db, 3)).toBeDefined()
+    expect(deleteAgent(db, 999)).toBe('not-found')
   })
 
   it('knows when a name is taken, ignoring case, and can skip one agent', () => {

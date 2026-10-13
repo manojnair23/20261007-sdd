@@ -15,7 +15,9 @@ describe('internal links', () => {
       seen.add(path)
 
       const { status, body } = await get(app, path)
-      if (status !== 200) {
+      // A delete page answers 409 when the record has appointments: that page exists and explains why.
+      const expectedRefusal = status === 409 && path.endsWith('/delete')
+      if (status !== 200 && !expectedRefusal) {
         broken.push(`${path} -> ${status}`)
         continue
       }

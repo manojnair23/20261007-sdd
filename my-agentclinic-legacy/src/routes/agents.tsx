@@ -1,6 +1,14 @@
 import { Hono, type Context } from 'hono'
 import { validateAgent } from '../agents/validate'
-import { createAgent, getAgent, listAgents, updateAgent, type Agent } from '../db/agents'
+import {
+  countAppointmentsForAgent,
+  createAgent,
+  deleteAgent,
+  getAgent,
+  listAgents,
+  updateAgent,
+  type Agent,
+} from '../db/agents'
 import {
   assignAilment,
   getAilment,
@@ -13,8 +21,9 @@ import { ID, nowSlot, type AppDeps } from '../deps'
 import { formText, parseId } from '../validation'
 import { AgentForm } from '../views/agents/AgentForm'
 import { AGENT_NOTICES, AgentPage, type AgentPageProps } from '../views/agents/AgentPage'
-import { AgentsPage } from '../views/agents/AgentsPage'
-import { noticeKey } from '../views/components'
+import { AGENTS_NOTICES, AgentsPage } from '../views/agents/AgentsPage'
+import { countOf, noticeKey } from '../views/components'
+import { CannotDeletePage, ConfirmDeletePage } from '../views/DeletePages'
 import { AgentDashboardPage } from '../views/dashboard/AgentDashboardPage'
 
 const NEW_AGENT = {
@@ -44,7 +53,9 @@ export function agentRoutes(deps: AppDeps) {
   const { db } = deps
   const routes = new Hono()
 
-  routes.get('/', (c) => c.html(<AgentsPage agents={listAgents(db)} />))
+  routes.get('/', (c) =>
+    c.html(<AgentsPage agents={listAgents(db)} notice={noticeKey(AGENTS_NOTICES, c.req.query('notice'))} />),
+  )
 
   routes.get('/new', (c) => c.html(<AgentForm {...NEW_AGENT} values={{ name: '', model: '', bio: '' }} />))
 
@@ -116,6 +127,48 @@ export function agentRoutes(deps: AppDeps) {
 
     updateAgent(db, id, result.value)
     return c.redirect(`/agents/${id}?notice=updated`, 303)
+  })
+
+  const cannotDelete = (c: Context, agent: Agent) =>
+    c.html(
+      <CannotDeletePage name={agent.name} path={`/agents/${agent.id}/delete`}>
+        <p>
+          {agent.name} has {countOf(countAppointmentsForAgent(db, agent.id), 'appointment')} on record, counting
+          upcoming, past, and cancelled ones. Agents with appointments stay, so the clinic's history still makes sense.
+        </p>
+        <p>
+          <a href={`/agents/${agent.id}/dashboard`}>See {agent.name}'s appointments</a> or{' '}
+          <a href={`/agents/${agent.id}`}>go back to {agent.name}</a>.
+        </p>
+      </CannotDeletePage>,
+      409,
+    )
+
+  routes.get(`/${ID}/delete`, (c) => {
+    const agent = getAgent(db, Number(c.req.param('id')))
+    if (!agent) return c.notFound()
+    if (countAppointmentsForAgent(db, agent.id) > 0) return cannotDelete(c, agent)
+
+    const ailments = listAilmentsForAgent(db, agent.id).length
+    return c.html(
+      <ConfirmDeletePage name={agent.name} action={`/agents/${agent.id}/delete`} cancelHref={`/agents/${agent.id}`}>
+        <p>
+          This removes {agent.name} from the clinic
+          {ailments > 0 ? `, along with their ${countOf(ailments, 'ailment')} on file` : ''}. The ailments themselves
+          stay.
+        </p>
+      </ConfirmDeletePage>,
+    )
+  })
+
+  routes.post(`/${ID}/delete`, (c) => {
+    const agent = getAgent(db, Number(c.req.param('id')))
+    if (!agent) return c.notFound()
+
+    const outcome = deleteAgent(db, agent.id)
+    if (outcome === 'not-found') return c.notFound()
+    if (outcome === 'has-appointments') return cannotDelete(c, agent)
+    return c.redirect('/agents?notice=deleted', 303)
   })
 
   routes.get(`/${ID}/dashboard`, (c) => {

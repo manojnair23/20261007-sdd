@@ -82,6 +82,9 @@ export const AgentPage = ({ agent, ailments, unassigned, notice, addAilment }: A
       <a href={`/agents/${agent.id}/edit`} role="button" class="secondary outline">
         Edit details
       </a>
+      <a href={`/agents/${agent.id}/delete`} role="button" class="secondary outline">
+        Delete agent
+      </a>
     </div>
   </Layout>
 )

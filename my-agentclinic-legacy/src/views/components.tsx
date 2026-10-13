@@ -14,6 +14,9 @@ export const PageHeader = ({ title, lead }: PageHeaderProps) => (
   </hgroup>
 )
 
+/** "1 appointment", "3 appointments". For nouns that just add an "s". */
+export const countOf = (count: number, noun: string) => `${count} ${noun}${count === 1 ? '' : 's'}`
+
 type EmptyStateProps = {
   children: Child
 }

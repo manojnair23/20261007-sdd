@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { getAgent, listAgents } from '../db/agents'
-import { assignAilment, listAilmentsForAgent } from '../db/ailments'
+import { createAgent, getAgent, listAgents } from '../db/agents'
+import { assignAilment, listAgentsWithAilment, listAilmentsForAgent } from '../db/ailments'
 import { get, post, testApp } from '../test/testApp'
 
 // Staff management of agents. The read-only agent pages are tested in catalog.test.ts.
@@ -226,5 +226,72 @@ describe("managing an agent's ailments", () => {
     expect((await post(app, '/agents/999/ailments/1/remove')).status).toBe(404)
     expect((await post(app, '/agents/1/ailments/999/remove')).status).toBe(404)
     expect((await post(app, '/agents/1/ailments/abc/remove')).status).toBe(404)
+  })
+})
+
+describe('deleting an agent', () => {
+  // In the seed, agent 4 (Prompta Vague) has no appointments. Agent 1 has an upcoming one,
+  // agent 2 only a cancelled one, and agent 3 only a past one.
+
+  it('links to the confirmation page from the agent page', async () => {
+    const { app } = testApp()
+    expect((await get(app, '/agents/4')).body).toContain(
+      '<a href="/agents/4/delete" role="button" class="secondary outline">Delete agent</a>',
+    )
+  })
+
+  it('asks first, saying what goes with the agent', async () => {
+    const { app, db } = testApp()
+    const { status, body } = await get(app, '/agents/4/delete')
+    expect(status).toBe(200)
+    expect(body).toContain('<h1>Delete Prompta Vague?</h1>')
+    expect(body).toContain('along with their 2 ailments on file. The ailments themselves stay.')
+    expect(body).toContain('<form method="post" action="/agents/4/delete" class="actions">')
+    expect(body).toContain('<button type="submit" class="secondary">Delete Prompta Vague</button>')
+    expect(body).toContain('<a href="/agents/4" role="button" class="secondary outline">Keep it</a>')
+    expect(getAgent(db, 4)).toBeDefined()
+  })
+
+  it('leaves out the ailments when the agent has none', async () => {
+    const { app, db } = testApp()
+    const id = createAgent(db, newAgent)
+    const { body } = await get(app, `/agents/${id}/delete`)
+    expect(body).toContain('This removes Embedding Edna from the clinic. The ailments themselves stay.')
+  })
+
+  it('deletes the agent and their ailment links, then lists agents with a notice', async () => {
+    const { app, db } = testApp()
+    const { status, location } = await post(app, '/agents/4/delete')
+    expect(status).toBe(303)
+    expect(location).toBe('/agents?notice=deleted')
+    expect(getAgent(db, 4)).toBeUndefined()
+    expect(listAgentsWithAilment(db, 1).map((a) => a.id)).toEqual([1, 3])
+
+    const { body } = await get(app, location!)
+    expect(body).toContain('<div role="status" class="notice">Agent removed. We wish them well out there.</div>')
+    expect(body).not.toContain('Prompta Vague')
+  })
+
+  it.each([
+    [1, 'GPT-Overthinker', 'upcoming'],
+    [2, 'Captain Hallucination', 'cancelled'],
+    [3, 'Loopy McRetry', 'past'],
+  ])('keeps agent %i (%s), who has a %s appointment, with a 409 before and after confirming', async (id, name) => {
+    const { app, db } = testApp()
+    for (const { status, body } of [await get(app, `/agents/${id}/delete`), await post(app, `/agents/${id}/delete`)]) {
+      expect(status).toBe(409)
+      expect(body).toContain(`<h1>${name} can&#39;t be deleted</h1>`)
+      expect(body).toContain(`${name} has 1 appointment on record`)
+      expect(body).toContain(`<a href="/agents/${id}/dashboard">`)
+      expect(body).not.toContain('<form method="post"')
+    }
+    expect(getAgent(db, id)).toBeDefined()
+    expect(listAilmentsForAgent(db, id)).toHaveLength(2)
+  })
+
+  it('returns 404 for an unknown agent', async () => {
+    const { app } = testApp()
+    expect((await get(app, '/agents/999/delete')).status).toBe(404)
+    expect((await post(app, '/agents/999/delete')).status).toBe(404)
   })
 })
