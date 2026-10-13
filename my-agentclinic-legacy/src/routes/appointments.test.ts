@@ -37,6 +37,10 @@ describe('GET /appointments', () => {
       '<div role="status" class="notice">Appointment booked. Deep breaths until then.</div>',
     )
     expect((await get(app, '/appointments?notice=hacked')).body).toContain('<div role="status"></div>')
+    // Names every object inherits used to slip through and show an empty notice box.
+    for (const inherited of ['toString', 'constructor', '__proto__']) {
+      expect((await get(app, `/appointments?notice=${inherited}`)).body).toContain('<div role="status"></div>')
+    }
   })
 
   it('shows empty states when there are no appointments', async () => {

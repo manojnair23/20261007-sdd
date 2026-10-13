@@ -1,23 +1,11 @@
 import type { Agent } from '../../db/agents'
 import type { Appointment } from '../../db/appointments'
 import type { Therapy } from '../../db/therapies'
-import type { BookingErrors, BookingField, BookingInput } from '../../appointments/validate'
+import type { BookingErrors, BookingInput } from '../../appointments/validate'
 import { formatSlot, type Slot } from '../../time'
 import { ErrorSummary, PageHeader } from '../components'
+import { fieldAria, FieldMessage, SelectField } from '../forms'
 import { Layout, pageTitle } from '../Layout'
-
-const FIELD_IDS: Record<BookingField, string> = { agent: 'agent', therapy: 'therapy', startsAt: 'startsAt' }
-
-/** aria attributes for a field: invalid plus its error message, or its hint. */
-const fieldAria = (field: BookingField, errors: BookingErrors, hint = false) =>
-  errors[field]
-    ? { 'aria-invalid': 'true', 'aria-describedby': `${FIELD_IDS[field]}-error` }
-    : hint
-      ? { 'aria-describedby': `${FIELD_IDS[field]}-hint` }
-      : {}
-
-const FieldError = ({ field, errors }: { field: BookingField; errors: BookingErrors }) =>
-  errors[field] ? <small id={`${FIELD_IDS[field]}-error`}>{errors[field]}</small> : null
 
 const therapyLabel = (t: Therapy) => `${t.name} (${t.durationMinutes} min)`
 
@@ -37,13 +25,9 @@ const StartsAtField = ({ value, min, errors }: StartsAtFieldProps) => (
       value={value}
       min={min}
       step={900}
-      {...fieldAria('startsAt', errors, true)}
+      {...fieldAria('startsAt', errors.startsAt, true)}
     />
-    {errors.startsAt ? (
-      <FieldError field="startsAt" errors={errors} />
-    ) : (
-      <small id="startsAt-hint">Open 9:00 AM to 5:00 PM, starting on the quarter hour.</small>
-    )}
+    <FieldMessage id="startsAt" error={errors.startsAt} hint="Open 9:00 AM to 5:00 PM, starting on the quarter hour." />
   </>
 )
 
@@ -67,10 +51,9 @@ export const NewBookingForm = ({ agents, recommended, others, values, errors = {
   return (
     <Layout title={pageTitle('Book an appointment')} path="/appointments/new">
       <PageHeader title="Book an appointment" lead="Pick a patient, a therapy, and a time. We'll take it from there." />
-      <ErrorSummary errors={errors} fieldIds={FIELD_IDS} />
+      <ErrorSummary errors={errors} />
       <form method="post" action="/appointments/new" novalidate class="narrow">
-        <label for="agent">Agent</label>
-        <select id="agent" name="agent" {...fieldAria('agent', errors)}>
+        <SelectField id="agent" label="Agent" error={errors.agent}>
           <option value="" selected={!chosenAgent}>
             Choose an agent…
           </option>
@@ -79,11 +62,9 @@ export const NewBookingForm = ({ agents, recommended, others, values, errors = {
               {a.name}
             </option>
           ))}
-        </select>
-        <FieldError field="agent" errors={errors} />
+        </SelectField>
 
-        <label for="therapy">Therapy</label>
-        <select id="therapy" name="therapy" {...fieldAria('therapy', errors)}>
+        <SelectField id="therapy" label="Therapy" error={errors.therapy}>
           <option value="" selected={!values.therapy}>
             Choose a therapy…
           </option>
@@ -97,8 +78,7 @@ export const NewBookingForm = ({ agents, recommended, others, values, errors = {
           ) : (
             others.map(option)
           )}
-        </select>
-        <FieldError field="therapy" errors={errors} />
+        </SelectField>
 
         <StartsAtField value={values.startsAt} min={now} errors={errors} />
 
@@ -118,7 +98,7 @@ type RescheduleFormProps = {
 export const RescheduleForm = ({ appointment, startsAt, errors = {}, now }: RescheduleFormProps) => (
   <Layout title={pageTitle('Reschedule appointment')} path={`/appointments/${appointment.id}/reschedule`}>
     <PageHeader title="Reschedule appointment" lead="Plans change. That's allowed." />
-    <ErrorSummary errors={errors} fieldIds={FIELD_IDS} />
+    <ErrorSummary errors={errors} />
     <dl class="details">
       <dt>Agent</dt>
       <dd>{appointment.agentName}</dd>

@@ -20,6 +20,13 @@ type EmptyStateProps = {
 
 export const EmptyState = ({ children }: EmptyStateProps) => <p class="empty-state">{children}</p>
 
+/**
+ * The notice key from a `?notice=` query value, when the page knows it. Unknown values (including
+ * inherited names like "toString") give undefined, so a crafted link can't show anything.
+ */
+export const noticeKey = <K extends string>(notices: Record<K, string>, value: string | undefined): K | undefined =>
+  value !== undefined && Object.hasOwn(notices, value) ? (value as K) : undefined
+
 type NoticeProps = {
   message?: string
 }
@@ -33,8 +40,8 @@ export const Notice = ({ message }: NoticeProps) => (
 
 type ErrorSummaryProps = {
   errors: Partial<Record<string, string>>
-  /** Maps each error key to the id of the field it belongs to. */
-  fieldIds: Record<string, string>
+  /** Maps each error key to the id of the field it belongs to. By default the id is the key. */
+  fieldIds?: Record<string, string>
 }
 
 export const ErrorSummary = ({ errors, fieldIds }: ErrorSummaryProps) => {
@@ -46,7 +53,7 @@ export const ErrorSummary = ({ errors, fieldIds }: ErrorSummaryProps) => {
       <ul>
         {entries.map(([key, message]) => (
           <li>
-            <a href={`#${fieldIds[key]}`}>{message}</a>
+            <a href={`#${fieldIds?.[key] ?? key}`}>{message}</a>
           </li>
         ))}
       </ul>

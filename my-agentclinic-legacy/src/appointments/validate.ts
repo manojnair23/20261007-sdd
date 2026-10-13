@@ -3,6 +3,7 @@ import { listScheduledForAgentOnDate, type NewAppointment } from '../db/appointm
 import type { Db } from '../db/connection'
 import { getTherapy } from '../db/therapies'
 import { addMinutes, formatTime, isSlot, slotDate, slotTime, type Slot } from '../time'
+import { parseId, type FieldErrors, type Validated } from '../validation'
 
 export const OPENS_AT = '09:00'
 export const CLOSES_AT = '17:00'
@@ -17,12 +18,9 @@ export type BookingInput = {
 
 export type BookingField = keyof BookingInput
 
-export type BookingErrors = Partial<Record<BookingField, string>>
+export type BookingErrors = FieldErrors<BookingField>
 
-export type BookingResult =
-  { ok: true; value: NewAppointment } | { ok: false; errors: BookingErrors; values: BookingInput }
-
-const toId = (text: string) => (/^[1-9]\d{0,9}$/.test(text.trim()) ? Number(text.trim()) : undefined)
+export type BookingResult = Validated<NewAppointment, BookingField>
 
 /**
  * Checks a booking or reschedule against the clinic rules: the agent and therapy exist, and the
@@ -39,12 +37,12 @@ export function validateBooking(
   const errors: BookingErrors = {}
   const values = { agent: input.agent.trim(), therapy: input.therapy.trim(), startsAt: input.startsAt.trim() }
 
-  const agentId = toId(values.agent)
+  const agentId = parseId(values.agent)
   const agent = agentId === undefined ? undefined : getAgent(db, agentId)
   if (!values.agent) errors.agent = 'Choose an agent.'
   else if (!agent) errors.agent = 'Choose an agent from the list.'
 
-  const therapyId = toId(values.therapy)
+  const therapyId = parseId(values.therapy)
   const therapy = therapyId === undefined ? undefined : getTherapy(db, therapyId)
   if (!values.therapy) errors.therapy = 'Choose a therapy.'
   else if (!therapy) errors.therapy = 'Choose a therapy from the list.'
