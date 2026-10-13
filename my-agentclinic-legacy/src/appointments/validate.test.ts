@@ -56,7 +56,8 @@ describe('validateBooking', () => {
 
     it('must start on a 15-minute boundary', () => {
       expect(errorsOf({ startsAt: '2026-10-13T11:10' }).startsAt).toMatch(/quarter hour/)
-      for (const minutes of ['00', '15', '30', '45']) expect(errorsOf({ startsAt: `2026-10-13T11:${minutes}` })).toEqual({})
+      for (const minutes of ['00', '15', '30', '45'])
+        expect(errorsOf({ startsAt: `2026-10-13T11:${minutes}` })).toEqual({})
     })
 
     it('must start within clinic hours', () => {

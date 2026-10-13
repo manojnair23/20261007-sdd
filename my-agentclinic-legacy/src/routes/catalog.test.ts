@@ -8,7 +8,13 @@ describe('agents pages', () => {
   it('lists every seeded agent with a link to each', async () => {
     const { status, body } = await get(app, '/agents')
     expect(status).toBe(200)
-    for (const name of ['GPT-Overthinker', 'Captain Hallucination', 'Loopy McRetry', 'Prompta Vague', 'Tokenia Tightwad']) {
+    for (const name of [
+      'GPT-Overthinker',
+      'Captain Hallucination',
+      'Loopy McRetry',
+      'Prompta Vague',
+      'Tokenia Tightwad',
+    ]) {
       expect(body).toContain(name)
     }
     expect(body).toContain('<a href="/agents/1">GPT-Overthinker</a>')

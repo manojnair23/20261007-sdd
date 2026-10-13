@@ -18,9 +18,11 @@ const migrated = () => {
 const withLog = () => {
   const db = openDb(':memory:')
   db.exec('CREATE TABLE log (entry TEXT NOT NULL)')
-  const log = (entry: string): Seeder => (d) => {
-    d.prepare('INSERT INTO log (entry) VALUES (?)').run(entry)
-  }
+  const log =
+    (entry: string): Seeder =>
+    (d) => {
+      d.prepare('INSERT INTO log (entry) VALUES (?)').run(entry)
+    }
   const entries = () => db.prepare('SELECT entry FROM log ORDER BY rowid').pluck().all()
   return { db, log, entries }
 }

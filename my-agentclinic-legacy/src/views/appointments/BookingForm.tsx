@@ -89,7 +89,9 @@ export const NewBookingForm = ({ agents, recommended, others, values, errors = {
           </option>
           {recommended.length > 0 ? (
             <>
-              <optgroup label={`Recommended for ${chosenAgent?.name ?? 'this agent'}`}>{recommended.map(option)}</optgroup>
+              <optgroup label={`Recommended for ${chosenAgent?.name ?? 'this agent'}`}>
+                {recommended.map(option)}
+              </optgroup>
               <optgroup label="Other therapies">{others.map(option)}</optgroup>
             </>
           ) : (

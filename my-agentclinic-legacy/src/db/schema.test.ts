@@ -7,8 +7,12 @@ describe('schema constraints', () => {
   const stamp = '2026-10-12T10:00:00.000Z'
 
   it('rejects duplicate names', () => {
-    expect(() => db.prepare("INSERT INTO agents (name, model, bio) VALUES ('GPT-Overthinker', 'x', 'x')").run()).toThrow(/UNIQUE/)
-    expect(() => db.prepare("INSERT INTO ailments (name, description) VALUES ('Prompt fatigue', 'x')").run()).toThrow(/UNIQUE/)
+    expect(() =>
+      db.prepare("INSERT INTO agents (name, model, bio) VALUES ('GPT-Overthinker', 'x', 'x')").run(),
+    ).toThrow(/UNIQUE/)
+    expect(() => db.prepare("INSERT INTO ailments (name, description) VALUES ('Prompt fatigue', 'x')").run()).toThrow(
+      /UNIQUE/,
+    )
   })
 
   it('rejects a blank name', () => {
@@ -30,7 +34,9 @@ describe('schema constraints', () => {
   })
 
   it('rejects orphan foreign keys', () => {
-    expect(() => db.prepare('INSERT INTO agent_ailments (agent_id, ailment_id) VALUES (999, 1)').run()).toThrow(/FOREIGN KEY/)
+    expect(() => db.prepare('INSERT INTO agent_ailments (agent_id, ailment_id) VALUES (999, 1)').run()).toThrow(
+      /FOREIGN KEY/,
+    )
     expect(() =>
       db
         .prepare(

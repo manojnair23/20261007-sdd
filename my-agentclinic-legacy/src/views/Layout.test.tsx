@@ -15,7 +15,13 @@ describe('layout subcomponents', () => {
   })
 
   it('Main wraps its children in a container', () => {
-    expect(render(<Main><p>Hello</p></Main>)).toBe('<main id="main" class="container" tabindex="-1"><p>Hello</p></main>')
+    expect(
+      render(
+        <Main>
+          <p>Hello</p>
+        </Main>,
+      ),
+    ).toBe('<main id="main" class="container" tabindex="-1"><p>Hello</p></main>')
   })
 
   it('Footer renders the footer line', () => {

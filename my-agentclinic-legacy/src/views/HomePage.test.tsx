@@ -35,10 +35,7 @@ describe('HomePage', () => {
   it('shows exactly two labelled audience cards', () => {
     expect(cards).toMatch(/^<section class="cards" aria-label="Who AgentClinic is for">/)
     expect(cards.match(/<article>/g)).toHaveLength(2)
-    expect(cards.match(/<h2>[^<]*<\/h2>/g)).toEqual([
-      '<h2>For agents</h2>',
-      '<h2>For clinic staff</h2>',
-    ])
+    expect(cards.match(/<h2>[^<]*<\/h2>/g)).toEqual(['<h2>For agents</h2>', '<h2>For clinic staff</h2>'])
   })
 
   it('links each audience card to its section', () => {

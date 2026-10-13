@@ -88,7 +88,12 @@ type AppointmentTableProps = {
 }
 
 /** A table on wide screens that stacks into labelled rows on phones (see .stack in styles.css). */
-export const AppointmentTable = ({ caption, appointments, actions = false, showAgent = true }: AppointmentTableProps) => (
+export const AppointmentTable = ({
+  caption,
+  appointments,
+  actions = false,
+  showAgent = true,
+}: AppointmentTableProps) => (
   <table class="stack">
     <caption>{caption}</caption>
     <thead>

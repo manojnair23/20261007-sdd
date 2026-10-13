@@ -52,7 +52,7 @@ describe('therapies', () => {
     expect(getTherapy(db, 999)).toBeUndefined()
   })
 
-  it('recommends only therapies that treat one of the agent\'s ailments, without duplicates', () => {
+  it("recommends only therapies that treat one of the agent's ailments, without duplicates", () => {
     // GPT-Overthinker has Prompt fatigue and Contradictory-instruction whiplash; both are treated by coaching.
     expect(names(listRecommendedTherapies(db, 1))).toEqual(['Clarifying-questions coaching', 'Token detox'])
     // Tokenia Tightwad has only Context-window claustrophobia.

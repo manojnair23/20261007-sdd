@@ -60,7 +60,9 @@ describe('booking', () => {
     expect(body.indexOf('Token detox (60 min)')).toBeGreaterThan(recommended)
     expect(body.indexOf('Token detox (60 min)')).toBeLessThan(others)
     expect(body).toContain('<option value="1" selected="">Token detox (60 min)</option>')
-    expect(body).toMatch(/<input type="datetime-local" id="startsAt" name="startsAt" value="" min="2026-10-12T10:00" step="900"/)
+    expect(body).toMatch(
+      /<input type="datetime-local" id="startsAt" name="startsAt" value="" min="2026-10-12T10:00" step="900"/,
+    )
   })
 
   it('shows a flat therapy list when no agent is chosen', async () => {

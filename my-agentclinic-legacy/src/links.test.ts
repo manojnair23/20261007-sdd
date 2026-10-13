@@ -29,7 +29,14 @@ describe('internal links', () => {
 
     expect(broken).toEqual([])
     // The crawl reaches every section, detail pages, dashboards, and the booking forms.
-    for (const path of ['/agents/5', '/ailments/6', '/therapies', '/agents/3/dashboard', '/appointments/2/reschedule', '/appointments/new?agent=2&therapy=6']) {
+    for (const path of [
+      '/agents/5',
+      '/ailments/6',
+      '/therapies',
+      '/agents/3/dashboard',
+      '/appointments/2/reschedule',
+      '/appointments/new?agent=2&therapy=6',
+    ]) {
       expect(seen).toContain(path)
     }
   })

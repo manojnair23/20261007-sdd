@@ -22,9 +22,7 @@ export function listAilments(db: Db): AilmentWithCount[] {
 }
 
 export function getAilment(db: Db, id: number): Ailment | undefined {
-  return db.prepare('SELECT id, name, description FROM ailments WHERE id = ?').get(id) as
-    | Ailment
-    | undefined
+  return db.prepare('SELECT id, name, description FROM ailments WHERE id = ?').get(id) as Ailment | undefined
 }
 
 export function listAgentsWithAilment(db: Db, ailmentId: number): Agent[] {

@@ -27,7 +27,10 @@ const pages = async () => {
   )
   // Also check a form re-rendered with errors.
   const invalid = await post(app, '/appointments/new', { agent: '', therapy: '', startsAt: '' })
-  return [...fetched, { path: 'POST /appointments/new (invalid)', expected: 400, status: invalid.status, body: invalid.body }]
+  return [
+    ...fetched,
+    { path: 'POST /appointments/new (invalid)', expected: 400, status: invalid.status, body: invalid.body },
+  ]
 }
 
 describe('accessibility baseline on every page', async () => {

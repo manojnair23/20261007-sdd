@@ -5,8 +5,7 @@ import { pendingMigrations, runMigrations } from './migrate'
 
 const fixtures = join(__dirname, '__fixtures__')
 
-const versions = (db: Db) =>
-  db.prepare('SELECT version FROM schema_migrations ORDER BY version').pluck().all()
+const versions = (db: Db) => db.prepare('SELECT version FROM schema_migrations ORDER BY version').pluck().all()
 
 const tableExists = (db: Db, name: string) =>
   db.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?").get(name) !== undefined

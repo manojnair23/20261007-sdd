@@ -14,7 +14,15 @@ describe('isSlot / parseSlot', () => {
   })
 
   it('rejects malformed and impossible values', () => {
-    for (const text of ['', 'soon', '2026-10-12', '2026-10-12 14:30', '2026-02-30T10:00', '2026-10-12T24:00', '2026-10-12T14:30:00']) {
+    for (const text of [
+      '',
+      'soon',
+      '2026-10-12',
+      '2026-10-12 14:30',
+      '2026-02-30T10:00',
+      '2026-10-12T24:00',
+      '2026-10-12T14:30:00',
+    ]) {
       expect(isSlot(text)).toBe(false)
     }
   })

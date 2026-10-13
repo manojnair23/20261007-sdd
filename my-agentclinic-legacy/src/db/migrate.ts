@@ -22,9 +22,7 @@ export function runMigrations(db: Db, dir: string = MIGRATIONS_DIR): string[] {
     applied_at TEXT NOT NULL
   )`)
 
-  const applied = new Set(
-    db.prepare('SELECT version FROM schema_migrations').pluck().all() as string[],
-  )
+  const applied = new Set(db.prepare('SELECT version FROM schema_migrations').pluck().all() as string[])
   const files = readdirSync(dir, { withFileTypes: true })
     .filter((entry) => entry.isFile())
     .map((entry) => entry.name)

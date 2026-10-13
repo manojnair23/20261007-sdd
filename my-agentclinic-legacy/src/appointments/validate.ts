@@ -20,8 +20,7 @@ export type BookingField = keyof BookingInput
 export type BookingErrors = Partial<Record<BookingField, string>>
 
 export type BookingResult =
-  | { ok: true; value: NewAppointment }
-  | { ok: false; errors: BookingErrors; values: BookingInput }
+  { ok: true; value: NewAppointment } | { ok: false; errors: BookingErrors; values: BookingInput }
 
 const toId = (text: string) => (/^[1-9]\d{0,9}$/.test(text.trim()) ? Number(text.trim()) : undefined)
 
