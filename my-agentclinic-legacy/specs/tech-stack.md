@@ -24,7 +24,10 @@ The stack is popular, TypeScript from end to end, and deliberately small, so stu
 - **Structure:** `src/routes/<domain>.tsx` (routes), `src/db/<domain>.ts` (data access), `src/views/<domain>/` (pages), and shared rules such as `src/appointments/validate.ts`.
 - **No SQL in route handlers.** Routes call typed data-layer functions that return plain row types.
 - **Dependency injection:** `createApp(deps)` takes the database and the clock. Never import a global database into a route.
-- **Forms:** POST-Redirect-GET with a 303 on success, a re-rendered form with a 400 on validation errors, and a 409 for actions that are no longer allowed. Forms use `novalidate`, and the server enforces every rule.
+- **Forms:** POST-Redirect-GET with a 303 on success, a re-rendered form with a 400 on validation errors, and a 409 for actions that are no longer allowed. Forms use `novalidate`, and the server enforces every rule. Fields come from `src/views/forms.tsx` and validators return `Validated` from `src/validation.ts`.
+- **CSRF:** `csrf()` runs on every request; a post without a same-origin `Origin` (or `Sec-Fetch-Site`) gets a 403 page. Tests post through `post()` in `src/test/testApp.ts`, which sends the same-origin header.
+- **Deleting:** always a GET confirmation page, then a POST. Agents and therapies with any appointment can't be deleted (409), so history stays whole.
+- **Notices:** `?notice=<key>` after a redirect, read with `noticeKey()`. They read "<Record> <verb>. <a short, kind line>.", and `src/views/notices.test.ts` checks that.
 - **Clinic time:** naive local `YYYY-MM-DDTHH:mm` strings. Set `TZ` to pin the zone.
 - **Accessibility:** one `<h1>` per page, a skip link, labelled fields, `scope` on table headers, visible focus, and `aria-current` in the nav.
 - **One gate:** `npm run validate` (typecheck → lint → test) must pass before review and after every phase. `npm run lint` covers both ESLint and the Prettier check, and `npm run format` fixes formatting.
@@ -34,7 +37,7 @@ The stack is popular, TypeScript from end to end, and deliberately small, so stu
 | Gap | Decision | Roadmap |
 |---|---|---|
 | ~~**Linting and formatting**~~ | **Closed in Phase 5.** ESLint and Prettier are in the current stack above, and `npm run validate` runs typecheck → lint → test. | Phase 5 ✅ |
-| **Staff writes and CSRF** | Staff CRUD adds new state-changing forms. They stay plain HTML posts. CSRF protection (Hono's `csrf()` origin check) comes in with those forms, because it costs one line and models good practice for students. | Phase 6 |
+| ~~**Staff writes and CSRF**~~ | **Closed in Phase 6.** Staff manage agents, ailments, and therapies with plain HTML posts, and `csrf()` checks the origin of every post. See the conventions above. | Phase 6 ✅ |
 
 ### Deliberately not added (for now)
 

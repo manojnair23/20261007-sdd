@@ -46,6 +46,7 @@ git config blame.ignoreRevsFile my-agentclinic-legacy/.git-blame-ignore-revs
 3. Back on the agent, **Book an appointment**: recommended therapies are listed first. Try a past time to see validation, then book tomorrow at 1:00 PM.
 4. **Appointments** shows the "booked" notice. **Reschedule** it, then **Cancel** it.
 5. **Dashboard** (staff) and the agent's own dashboard reflect every step.
-6. `npm run db:seed -- --force` resets everything for the next visitor.
+6. Under **Manage the catalog** on the dashboard, **Add an agent**, then give them an ailment from their page. Try to delete *GPT-Overthinker*: agents with appointments are kept, and the page explains why. Delete your new agent instead.
+7. `npm run db:seed -- --force` resets everything for the next visitor, including anything staff added.
 
-Everything works with JavaScript disabled.
+Everything works with JavaScript disabled. Forms only accept posts from the clinic's own pages (Hono's `csrf()` origin check), so a cross-site form gets a 403.

@@ -21,8 +21,19 @@ export async function get(app: ReturnType<typeof createApp>, path: string) {
   return { status: res.status, body: await res.text(), res }
 }
 
-/** Posts a URL-encoded form, without following redirects. */
-export async function post(app: ReturnType<typeof createApp>, path: string, form: Record<string, string> = {}) {
-  const res = await app.request(path, { method: 'POST', body: new URLSearchParams(form) })
+/** The origin `app.request` gives relative paths, so a form posted from the app itself passes the CSRF check. */
+export const SAME_ORIGIN = 'http://localhost'
+
+/**
+ * Posts a URL-encoded form as a browser would from one of the app's own pages, without following
+ * redirects. Pass `headers` to replace the default same-origin `Origin` header, for CSRF tests.
+ */
+export async function post(
+  app: ReturnType<typeof createApp>,
+  path: string,
+  form: Record<string, string> = {},
+  { headers = { Origin: SAME_ORIGIN } }: { headers?: Record<string, string> } = {},
+) {
+  const res = await app.request(path, { method: 'POST', body: new URLSearchParams(form), headers })
   return { status: res.status, body: await res.text(), location: res.headers.get('location'), res }
 }

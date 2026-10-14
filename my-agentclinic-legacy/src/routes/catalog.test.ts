@@ -96,6 +96,26 @@ describe('dashboards', () => {
     expect(body).toContain('action="/appointments/1/cancel"')
   })
 
+  it('links staff to every "add" page and every list from "Manage the catalog"', async () => {
+    const { body } = await get(app, '/dashboard')
+    const manage = /<section aria-labelledby="manage-heading">([\s\S]*?)<\/section>/.exec(body)![1]
+    expect(manage).toContain('<h2 id="manage-heading">Manage the catalog</h2>')
+    for (const [href, text] of [
+      ['/agents/new', 'Add an agent'],
+      ['/ailments/new', 'Add an ailment'],
+      ['/therapies/new', 'Add a therapy'],
+    ]) {
+      expect(manage).toContain(`<a href="${href}" role="button" class="secondary outline">${text}</a>`)
+    }
+    for (const [href, text] of [
+      ['/agents', 'All agents'],
+      ['/ailments', 'All ailments'],
+      ['/therapies', 'All therapies'],
+    ]) {
+      expect(manage).toContain(`<a href="${href}">${text}</a>`)
+    }
+  })
+
   it('shows an agent their ailments, recommended therapies, and appointments', async () => {
     const { status, body } = await get(app, '/agents/2/dashboard')
     expect(status).toBe(200)

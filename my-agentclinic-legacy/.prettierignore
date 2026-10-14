@@ -4,3 +4,4 @@ node_modules/
 package-lock.json
 src/db/__fixtures__/
 *.md
+.claude/

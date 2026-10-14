@@ -15,6 +15,20 @@ export const NotFoundPage = ({ path }: NotFoundPageProps) => (
   </Layout>
 )
 
+/** Shown with 403 when a form post fails the CSRF origin check. */
+export const ForbiddenPage = () => (
+  <Layout title={pageTitle('Form not accepted')}>
+    <PageHeader title="That form came from somewhere else" />
+    <p>
+      For everyone's safety, we only accept forms sent from AgentClinic's own pages. Go back, reload the page, and try
+      again.
+    </p>
+    <p>
+      <a href="/">Back to the home page</a>
+    </p>
+  </Layout>
+)
+
 export const ServerErrorPage = () => (
   <Layout title={pageTitle('Something went wrong')}>
     <PageHeader title="Something went wrong" />

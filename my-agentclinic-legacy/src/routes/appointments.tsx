@@ -11,17 +11,11 @@ import {
 } from '../db/appointments'
 import { listRecommendedTherapies, listTherapies } from '../db/therapies'
 import { ID, nowSlot, type AppDeps } from '../deps'
-import { AppointmentsPage, NOTICES, type NoticeKey } from '../views/appointments/AppointmentsPage'
+import { formText } from '../validation'
+import { AppointmentsPage, NOTICES } from '../views/appointments/AppointmentsPage'
 import { NewBookingForm, RescheduleForm } from '../views/appointments/BookingForm'
 import { NotChangeablePage } from '../views/appointments/NotChangeablePage'
-
-const isNotice = (value: string | undefined): value is NoticeKey => value !== undefined && value in NOTICES
-
-/** Reads a form field as a string; missing fields and file uploads become "". */
-const field = (body: Record<string, unknown>, name: string) => {
-  const value = body[name]
-  return typeof value === 'string' ? value : ''
-}
+import { noticeKey } from '../views/components'
 
 export function appointmentRoutes(deps: AppDeps) {
   const { db } = deps
@@ -44,12 +38,11 @@ export function appointmentRoutes(deps: AppDeps) {
     )
   }
 
-  routes.get('/', (c) => {
-    const notice = c.req.query('notice')
-    return c.html(
-      <AppointmentsPage {...listAppointments(db, nowSlot(deps))} notice={isNotice(notice) ? notice : undefined} />,
-    )
-  })
+  routes.get('/', (c) =>
+    c.html(
+      <AppointmentsPage {...listAppointments(db, nowSlot(deps))} notice={noticeKey(NOTICES, c.req.query('notice'))} />,
+    ),
+  )
 
   routes.get('/new', (c) =>
     bookingForm(c, { agent: c.req.query('agent') ?? '', therapy: c.req.query('therapy') ?? '', startsAt: '' }),
@@ -57,7 +50,11 @@ export function appointmentRoutes(deps: AppDeps) {
 
   routes.post('/new', async (c) => {
     const body = await c.req.parseBody()
-    const input = { agent: field(body, 'agent'), therapy: field(body, 'therapy'), startsAt: field(body, 'startsAt') }
+    const input = {
+      agent: formText(body, 'agent'),
+      therapy: formText(body, 'therapy'),
+      startsAt: formText(body, 'startsAt'),
+    }
     const result = validateBooking(db, input, nowSlot(deps))
     if (!result.ok) return bookingForm(c, result.values, result.errors, 400)
 
@@ -79,7 +76,7 @@ export function appointmentRoutes(deps: AppDeps) {
     const now = nowSlot(deps)
     if (!isChangeable(appointment, now)) return c.html(<NotChangeablePage appointment={appointment} />, 409)
 
-    const startsAt = field(await c.req.parseBody(), 'startsAt')
+    const startsAt = formText(await c.req.parseBody(), 'startsAt')
     const input = { agent: String(appointment.agentId), therapy: String(appointment.therapyId), startsAt }
     const result = validateBooking(db, input, now, { ignoreId: id })
     if (!result.ok) {

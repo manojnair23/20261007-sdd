@@ -49,23 +49,23 @@ Legend: ✅ done · ⬜ to do
 - ✅ 5.3 Format the whole codebase in one separate commit, with no other changes
 - ✅ 5.4 `npm run validate` becomes typecheck → lint → test; update the README
 
-## Phase 6 — Staff CRUD ⬜
+## Phase 6 — Staff CRUD ⬜ (built; manual browser checks pending)
 
 Each item is one small slice: data-layer function, route, view, and tests. Forms use POST-Redirect-GET and the validation and accessibility patterns from Phase 2.
 
-- ⬜ 6.1 CSRF protection (Hono `csrf()`) on every POST, with a test that a cross-origin post is rejected
-- ⬜ 6.2 A shared validation and error-summary pattern for catalog forms (taken from the booking form)
-- ⬜ 6.3 Agents: create
-- ⬜ 6.4 Agents: edit (name, model, bio)
-- ⬜ 6.5 Agents: assign and unassign ailments
-- ⬜ 6.6 Agents: delete, with a confirmation page, blocked when the agent has upcoming appointments (409)
-- ⬜ 6.7 Ailments: create and edit
-- ⬜ 6.8 Ailments: link and unlink therapies
-- ⬜ 6.9 Ailments: delete, with a confirmation page
-- ⬜ 6.10 Therapies: create and edit (name, description, duration > 0)
-- ⬜ 6.11 Therapies: delete, with a confirmation page, blocked when the therapy has upcoming appointments (409)
-- ⬜ 6.12 Notices for created, updated, and deleted records, plus "Manage" links from the staff dashboard
-- ⬜ 6.13 Seed reset and the accessibility and link-crawler sweeps cover every new page
+- ✅ 6.1 CSRF protection (Hono `csrf()`) on every POST, with a test that a cross-origin post is rejected
+- ✅ 6.2 A shared validation and error-summary pattern for catalog forms (taken from the booking form)
+- ✅ 6.3 Agents: create
+- ✅ 6.4 Agents: edit (name, model, bio)
+- ✅ 6.5 Agents: assign and unassign ailments
+- ✅ 6.6 Agents: delete, with a confirmation page, blocked when the agent has upcoming appointments (409) *(built stricter: any appointment blocks the delete, decided 2026-10-13)*
+- ✅ 6.7 Ailments: create and edit
+- ✅ 6.8 Ailments: link and unlink therapies
+- ✅ 6.9 Ailments: delete, with a confirmation page
+- ✅ 6.10 Therapies: create and edit (name, description, duration > 0) *(plus: the duration can't change while the therapy has upcoming appointments)*
+- ✅ 6.11 Therapies: delete, with a confirmation page, blocked when the therapy has upcoming appointments (409) *(any appointment, as in 6.6)*
+- ✅ 6.12 Notices for created, updated, and deleted records, plus "Manage" links from the staff dashboard *(each slice added its own notice; 6.12 aligned their wording)*
+- ✅ 6.13 Seed reset and the accessibility and link-crawler sweeps cover every new page
 
 ## Later (unscheduled)
 

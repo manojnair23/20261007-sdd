@@ -41,5 +41,32 @@ export const StaffDashboardPage = ({ stats }: StaffDashboardPageProps) => (
         <a href="/appointments">See all appointments</a>
       </p>
     </section>
+
+    <section aria-labelledby="manage-heading">
+      <h2 id="manage-heading">Manage the catalog</h2>
+      <p>Add new records here. To edit or delete one, open it from its list.</p>
+      <div class="actions">
+        <a href="/agents/new" role="button" class="secondary outline">
+          Add an agent
+        </a>
+        <a href="/ailments/new" role="button" class="secondary outline">
+          Add an ailment
+        </a>
+        <a href="/therapies/new" role="button" class="secondary outline">
+          Add a therapy
+        </a>
+      </div>
+      <ul>
+        <li>
+          <a href="/agents">All agents</a>
+        </li>
+        <li>
+          <a href="/ailments">All ailments</a>
+        </li>
+        <li>
+          <a href="/therapies">All therapies</a>
+        </li>
+      </ul>
+    </section>
   </Layout>
 )

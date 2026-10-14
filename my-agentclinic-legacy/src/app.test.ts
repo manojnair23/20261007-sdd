@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
-import { get, testApp } from './test/testApp'
+import { getAppointment } from './db/appointments'
+import { get, post, SAME_ORIGIN, testApp } from './test/testApp'
 
 const { app } = testApp()
 
@@ -81,6 +82,47 @@ describe('error pages', () => {
     expect(body).not.toContain('kaboom')
     expect(spy).toHaveBeenCalled()
     spy.mockRestore()
+  })
+})
+
+describe('CSRF protection', () => {
+  // Appointment 1 is upcoming in the seed, so a cancel that gets through would change its status.
+  const cancel = (headers: Record<string, string>) => {
+    const { app, db } = testApp()
+    const status = () => getAppointment(db, 1)?.status
+    return { status, response: post(app, '/appointments/1/cancel', {}, { headers }) }
+  }
+
+  it('rejects a form posted from another origin with a friendly 403, and changes nothing', async () => {
+    const { status, response } = cancel({ Origin: 'https://evil.example' })
+    const { status: code, body } = await response
+    expect(code).toBe(403)
+    expect(body).toContain('That form came from somewhere else')
+    expect(body.startsWith('<!doctype html>')).toBe(true)
+    expect(status()).toBe('scheduled')
+  })
+
+  it('rejects a form post with neither Origin nor Sec-Fetch-Site', async () => {
+    const { status, response } = cancel({})
+    expect((await response).status).toBe(403)
+    expect(status()).toBe('scheduled')
+  })
+
+  it('accepts a same-origin form post', async () => {
+    const { status, response } = cancel({ Origin: SAME_ORIGIN })
+    expect((await response).status).toBe(303)
+    expect(status()).toBe('cancelled')
+  })
+
+  it('accepts Sec-Fetch-Site: same-origin when the browser sends no Origin', async () => {
+    const { status, response } = cancel({ 'Sec-Fetch-Site': 'same-origin' })
+    expect((await response).status).toBe(303)
+    expect(status()).toBe('cancelled')
+  })
+
+  it('never checks GET requests', async () => {
+    const res = await app.request('/appointments', { headers: { Origin: 'https://evil.example' } })
+    expect(res.status).toBe(200)
   })
 })
 

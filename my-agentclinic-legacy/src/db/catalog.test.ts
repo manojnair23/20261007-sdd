@@ -1,8 +1,44 @@
 import { describe, expect, it } from 'vitest'
 import { FIXED_NOW, testApp } from '../test/testApp'
-import { getAgent, listAgents } from './agents'
-import { getAilment, listAgentsWithAilment, listAilments, listAilmentsForAgent } from './ailments'
-import { getTherapy, listRecommendedTherapies, listTherapies, listTherapiesForAilment } from './therapies'
+import {
+  agentNameTaken,
+  countAppointmentsForAgent,
+  createAgent,
+  deleteAgent,
+  getAgent,
+  listAgents,
+  updateAgent,
+} from './agents'
+import {
+  ailmentNameTaken,
+  assignAilment,
+  createAilment,
+  deleteAilment,
+  getAilment,
+  listAgentsWithAilment,
+  listAilments,
+  listAilmentsForAgent,
+  listAilmentsNotForAgent,
+  unassignAilment,
+  updateAilment,
+} from './ailments'
+import {
+  countAilmentLinksForTherapy,
+  countAppointmentsForTherapy,
+  countUpcomingAppointmentsForTherapy,
+  createTherapy,
+  deleteTherapy,
+  getTherapy,
+  linkTherapy,
+  listRecommendedTherapies,
+  listTherapies,
+  listTherapiesForAilment,
+  listTherapiesNotForAilment,
+  therapyNameTaken,
+  unlinkTherapy,
+  updateTherapy,
+} from './therapies'
+import { toSlot } from '../time'
 
 const { db } = testApp({ now: FIXED_NOW })
 const names = (rows: { name: string }[]) => rows.map((r) => r.name)
@@ -22,6 +58,50 @@ describe('agents', () => {
     expect(getAgent(db, 1)).toMatchObject({ id: 1, name: 'GPT-Overthinker', model: 'General-purpose language model' })
     expect(getAgent(db, 999)).toBeUndefined()
   })
+
+  it('creates an agent and returns its new id', () => {
+    const { db } = testApp()
+    const agent = {
+      name: 'Embedding Edna',
+      model: 'Embedding model',
+      bio: 'Feels close to everyone, in 1,536 dimensions.',
+    }
+    const id = createAgent(db, agent)
+    expect(id).toBe(6)
+    expect(getAgent(db, id)).toEqual({ id, ...agent })
+  })
+
+  it('updates an agent, and reports an unknown id', () => {
+    const { db } = testApp()
+    const changes = { name: 'GPT-Underthinker', model: 'Small language model', bio: 'Now answers in one word.' }
+    expect(updateAgent(db, 1, changes)).toBe(true)
+    expect(getAgent(db, 1)).toEqual({ id: 1, ...changes })
+    expect(updateAgent(db, 999, changes)).toBe(false)
+  })
+
+  it('counts every appointment an agent has, whatever its status', () => {
+    expect([1, 2, 3, 4, 5].map((id) => countAppointmentsForAgent(db, id))).toEqual([1, 1, 1, 0, 1])
+  })
+
+  it('deletes an agent without appointments, with their ailment links, and keeps the rest', () => {
+    const { db } = testApp()
+    expect(deleteAgent(db, 4)).toBe('ok')
+    expect(getAgent(db, 4)).toBeUndefined()
+    expect(listAgentsWithAilment(db, 4).map((a) => a.id)).not.toContain(4)
+    expect(db.prepare('SELECT count(*) AS n FROM agent_ailments WHERE agent_id = 4').get()).toEqual({ n: 0 })
+
+    expect(deleteAgent(db, 3)).toBe('has-appointments')
+    expect(getAgent(db, 3)).toBeDefined()
+    expect(deleteAgent(db, 999)).toBe('not-found')
+  })
+
+  it('knows when a name is taken, ignoring case, and can skip one agent', () => {
+    expect(agentNameTaken(db, 'GPT-Overthinker')).toBe(true)
+    expect(agentNameTaken(db, 'gpt-overTHINKER')).toBe(true)
+    expect(agentNameTaken(db, 'GPT-Underthinker')).toBe(false)
+    expect(agentNameTaken(db, 'GPT-Overthinker', 1)).toBe(false)
+    expect(agentNameTaken(db, 'GPT-Overthinker', 2)).toBe(true)
+  })
 })
 
 describe('ailments', () => {
@@ -36,6 +116,58 @@ describe('ailments', () => {
     expect(names(listAgentsWithAilment(db, 1))).toEqual(['GPT-Overthinker', 'Loopy McRetry', 'Prompta Vague'])
     expect(getAilment(db, 2)?.name).toBe('Context-window claustrophobia')
     expect(getAilment(db, 999)).toBeUndefined()
+  })
+
+  it('creates and updates an ailment, and reports an unknown id', () => {
+    const { db } = testApp()
+    const ailment = { name: 'Emoji overload', description: 'Ends every reply with a rocket.' }
+    const id = createAilment(db, ailment)
+    expect(id).toBe(7)
+    expect(getAilment(db, id)).toEqual({ id, ...ailment })
+
+    const changes = { name: 'Emoji fatigue', description: 'Has stopped using the rocket.' }
+    expect(updateAilment(db, id, changes)).toBe(true)
+    expect(getAilment(db, id)).toEqual({ id, ...changes })
+    expect(updateAilment(db, 999, changes)).toBe(false)
+  })
+
+  it('deletes an ailment with its agent and therapy links', () => {
+    const { db } = testApp()
+    expect(deleteAilment(db, 1)).toBe('ok')
+    expect(getAilment(db, 1)).toBeUndefined()
+    expect(listAgentsWithAilment(db, 1)).toEqual([])
+    expect(listTherapiesForAilment(db, 1)).toEqual([])
+    expect(db.prepare('SELECT count(*) AS n FROM agent_ailments WHERE ailment_id = 1').get()).toEqual({ n: 0 })
+    expect(db.prepare('SELECT count(*) AS n FROM ailment_therapies WHERE ailment_id = 1').get()).toEqual({ n: 0 })
+    expect(deleteAilment(db, 1)).toBe('not-found')
+  })
+
+  it('knows when an ailment name is taken, ignoring case, and can skip one ailment', () => {
+    expect(ailmentNameTaken(db, 'prompt FATIGUE')).toBe(true)
+    expect(ailmentNameTaken(db, 'Prompt fatigue', 1)).toBe(false)
+    expect(ailmentNameTaken(db, 'Prompt fatigue', 2)).toBe(true)
+    expect(ailmentNameTaken(db, 'Prompt euphoria')).toBe(false)
+  })
+
+  it("lists the ailments an agent doesn't have", () => {
+    expect(names(listAilmentsNotForAgent(db, 1))).toEqual([
+      'Context-window claustrophobia',
+      'Hallucination anxiety',
+      'Retry-loop syndrome',
+      'Temperature dysregulation',
+    ])
+  })
+
+  it('assigns and unassigns ailments, ignoring repeats', () => {
+    const { db } = testApp()
+    assignAilment(db, 5, 5)
+    assignAilment(db, 5, 5)
+    expect(names(listAilmentsForAgent(db, 5))).toEqual(['Context-window claustrophobia', 'Hallucination anxiety'])
+
+    unassignAilment(db, 5, 2)
+    unassignAilment(db, 5, 2)
+    expect(names(listAilmentsForAgent(db, 5))).toEqual(['Hallucination anxiety'])
+    expect(names(listAilmentsNotForAgent(db, 5))).toHaveLength(5)
   })
 })
 
@@ -58,5 +190,72 @@ describe('therapies', () => {
     // Tokenia Tightwad has only Context-window claustrophobia.
     expect(names(listRecommendedTherapies(db, 5))).toEqual(['Context decluttering', 'Token detox'])
     expect(listRecommendedTherapies(db, 999)).toEqual([])
+  })
+
+  it('creates and updates a therapy, and reports an unknown id', () => {
+    const { db } = testApp()
+    const therapy = { name: 'Gradient descent walk', description: 'Downhill, gently.', durationMinutes: 45 }
+    const id = createTherapy(db, therapy)
+    expect(id).toBe(7)
+    expect(getTherapy(db, id)).toEqual({ id, ...therapy })
+
+    const changes = { name: 'Gradient ascent hike', description: 'Uphill, bravely.', durationMinutes: 90 }
+    expect(updateTherapy(db, id, changes)).toBe(true)
+    expect(getTherapy(db, id)).toEqual({ id, ...changes })
+    expect(updateTherapy(db, 999, changes)).toBe(false)
+  })
+
+  it('knows when a therapy name is taken, ignoring case, and can skip one therapy', () => {
+    expect(therapyNameTaken(db, 'TOKEN detox')).toBe(true)
+    expect(therapyNameTaken(db, 'Token detox', 1)).toBe(false)
+    expect(therapyNameTaken(db, 'Token detox', 2)).toBe(true)
+    expect(therapyNameTaken(db, 'Token retox')).toBe(false)
+  })
+
+  it('counts only scheduled appointments that have not started yet', () => {
+    // 3 and 4 have upcoming appointments; 5 only a past one; 6 only a cancelled one.
+    const now = toSlot(FIXED_NOW)
+    expect([1, 2, 3, 4, 5, 6].map((id) => countUpcomingAppointmentsForTherapy(db, id, now))).toEqual([0, 0, 1, 1, 0, 0])
+    // Once the appointment for therapy 4 (tomorrow at 10:00) has started, it no longer counts.
+    expect(countUpcomingAppointmentsForTherapy(db, 4, '2026-10-13T10:00')).toBe(0)
+  })
+
+  it('counts every appointment and ailment link a therapy has', () => {
+    expect([1, 2, 3, 4, 5, 6].map((id) => countAppointmentsForTherapy(db, id))).toEqual([0, 0, 1, 1, 1, 1])
+    expect([1, 2, 3, 4, 5, 6].map((id) => countAilmentLinksForTherapy(db, id))).toEqual([2, 2, 1, 2, 1, 1])
+  })
+
+  it('deletes a therapy without appointments, with its ailment links, and keeps the rest', () => {
+    const { db } = testApp()
+    expect(deleteTherapy(db, 1)).toBe('ok')
+    expect(getTherapy(db, 1)).toBeUndefined()
+    expect(countAilmentLinksForTherapy(db, 1)).toBe(0)
+
+    expect(deleteTherapy(db, 5)).toBe('has-appointments')
+    expect(getTherapy(db, 5)).toBeDefined()
+    expect(deleteTherapy(db, 999)).toBe('not-found')
+  })
+
+  it('lists the therapies not linked to an ailment', () => {
+    expect(names(listTherapiesNotForAilment(db, 1))).toEqual([
+      'Citation grounding',
+      'Context decluttering',
+      'Exponential-backoff meditation',
+      'Guided temperature reduction',
+    ])
+  })
+
+  it('links and unlinks therapies, ignoring repeats', () => {
+    const { db } = testApp()
+    linkTherapy(db, 3, 2)
+    linkTherapy(db, 3, 2)
+    expect(names(listTherapiesForAilment(db, 3))).toEqual([
+      'Exponential-backoff meditation',
+      'Guided temperature reduction',
+    ])
+
+    unlinkTherapy(db, 3, 5)
+    unlinkTherapy(db, 3, 5)
+    expect(names(listTherapiesForAilment(db, 3))).toEqual(['Guided temperature reduction'])
   })
 })

@@ -14,17 +14,31 @@ export const PageHeader = ({ title, lead }: PageHeaderProps) => (
   </hgroup>
 )
 
+/** "1 appointment", "3 appointments". For nouns that just add an "s". */
+export const countOf = (count: number, noun: string) => `${count} ${noun}${count === 1 ? '' : 's'}`
+
 type EmptyStateProps = {
   children: Child
 }
 
 export const EmptyState = ({ children }: EmptyStateProps) => <p class="empty-state">{children}</p>
 
+/**
+ * The notice key from a `?notice=` query value, when the page knows it. Unknown values (including
+ * inherited names like "toString") give undefined, so a crafted link can't show anything.
+ */
+export const noticeKey = <K extends string>(notices: Record<K, string>, value: string | undefined): K | undefined =>
+  value !== undefined && Object.hasOwn(notices, value) ? (value as K) : undefined
+
 type NoticeProps = {
   message?: string
 }
 
-/** A polite status message after a form succeeds. The region is always present so it is announced. */
+/**
+ * A polite status message after a form succeeds. The region is always present so it is announced.
+ * Notices read "<Record> <verb>. <a short, kind line>." Records are added, updated, or deleted; an
+ * agent's ailments are assigned or unassigned; an ailment's therapies are linked or unlinked.
+ */
 export const Notice = ({ message }: NoticeProps) => (
   <div role="status" class={message ? 'notice' : undefined}>
     {message}
@@ -33,8 +47,8 @@ export const Notice = ({ message }: NoticeProps) => (
 
 type ErrorSummaryProps = {
   errors: Partial<Record<string, string>>
-  /** Maps each error key to the id of the field it belongs to. */
-  fieldIds: Record<string, string>
+  /** Maps each error key to the id of the field it belongs to. By default the id is the key. */
+  fieldIds?: Record<string, string>
 }
 
 export const ErrorSummary = ({ errors, fieldIds }: ErrorSummaryProps) => {
@@ -46,7 +60,7 @@ export const ErrorSummary = ({ errors, fieldIds }: ErrorSummaryProps) => {
       <ul>
         {entries.map(([key, message]) => (
           <li>
-            <a href={`#${fieldIds[key]}`}>{message}</a>
+            <a href={`#${fieldIds?.[key] ?? key}`}>{message}</a>
           </li>
         ))}
       </ul>
