@@ -108,7 +108,7 @@ describe('editing an agent', () => {
     expect(location).toBe('/agents/3?notice=updated')
     expect(getAgent(db, 3)).toEqual({ id: 3, ...changes })
     expect((await get(app, location!)).body).toContain(
-      '<div role="status" class="notice">Details saved. A fresh start.</div>',
+      '<div role="status" class="notice">Agent updated. A fresh start.</div>',
     )
   })
 
@@ -175,7 +175,7 @@ describe("managing an agent's ailments", () => {
     }
     expect(ailmentNames(db, 5)).toEqual(['Context-window claustrophobia', 'Hallucination anxiety'])
     expect((await get(app, '/agents/5?notice=ailment-added')).body).toContain(
-      '<div role="status" class="notice">Ailment added. Naming it is the first step.</div>',
+      '<div role="status" class="notice">Ailment assigned. Naming it is the first step.</div>',
     )
   })
 
@@ -216,7 +216,7 @@ describe("managing an agent's ailments", () => {
     }
     expect(ailmentNames(db, 1)).toEqual(['Contradictory-instruction whiplash'])
     expect((await get(app, '/agents/1?notice=ailment-removed')).body).toContain(
-      'Ailment removed. One less thing to carry.',
+      'Ailment unassigned. One less thing to carry.',
     )
   })
 
@@ -268,7 +268,7 @@ describe('deleting an agent', () => {
     expect(listAgentsWithAilment(db, 1).map((a) => a.id)).toEqual([1, 3])
 
     const { body } = await get(app, location!)
-    expect(body).toContain('<div role="status" class="notice">Agent removed. We wish them well out there.</div>')
+    expect(body).toContain('<div role="status" class="notice">Agent deleted. We wish them well out there.</div>')
     expect(body).not.toContain('Prompta Vague')
   })
 

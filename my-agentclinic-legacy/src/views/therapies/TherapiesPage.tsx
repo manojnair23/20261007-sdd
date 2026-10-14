@@ -6,7 +6,7 @@ import { Layout, pageTitle } from '../Layout'
 export const THERAPIES_NOTICES = {
   created: 'Therapy added. The treatment rooms are ready.',
   updated: 'Therapy updated. Same care, fresh details.',
-  deleted: 'Therapy retired. Thank you for your service.',
+  deleted: 'Therapy deleted. Thank you for your service.',
 } as const
 
 type TherapiesPageProps = {

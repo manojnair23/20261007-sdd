@@ -6,9 +6,9 @@ import { Layout, pageTitle } from '../Layout'
 
 export const AGENT_NOTICES = {
   created: 'Agent added. Welcome to the clinic.',
-  updated: 'Details saved. A fresh start.',
-  'ailment-added': 'Ailment added. Naming it is the first step.',
-  'ailment-removed': 'Ailment removed. One less thing to carry.',
+  updated: 'Agent updated. A fresh start.',
+  'ailment-added': 'Ailment assigned. Naming it is the first step.',
+  'ailment-removed': 'Ailment unassigned. One less thing to carry.',
 } as const
 
 export type AgentPageProps = {

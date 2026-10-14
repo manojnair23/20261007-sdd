@@ -3,7 +3,7 @@ import { EmptyState, Notice, PageHeader } from '../components'
 import { Layout, pageTitle } from '../Layout'
 
 export const AGENTS_NOTICES = {
-  deleted: 'Agent removed. We wish them well out there.',
+  deleted: 'Agent deleted. We wish them well out there.',
 } as const
 
 type AgentsPageProps = {

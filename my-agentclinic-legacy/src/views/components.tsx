@@ -34,7 +34,11 @@ type NoticeProps = {
   message?: string
 }
 
-/** A polite status message after a form succeeds. The region is always present so it is announced. */
+/**
+ * A polite status message after a form succeeds. The region is always present so it is announced.
+ * Notices read "<Record> <verb>. <a short, kind line>." Records are added, updated, or deleted; an
+ * agent's ailments are assigned or unassigned; an ailment's therapies are linked or unlinked.
+ */
 export const Notice = ({ message }: NoticeProps) => (
   <div role="status" class={message ? 'notice' : undefined}>
     {message}

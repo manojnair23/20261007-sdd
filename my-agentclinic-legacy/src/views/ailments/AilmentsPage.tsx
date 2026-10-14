@@ -3,7 +3,7 @@ import { EmptyState, Notice, PageHeader } from '../components'
 import { Layout, pageTitle } from '../Layout'
 
 export const AILMENTS_NOTICES = {
-  deleted: 'Ailment removed from the records. One less thing to worry about.',
+  deleted: 'Ailment deleted. May it trouble no agent again.',
 } as const
 
 type AilmentsPageProps = {

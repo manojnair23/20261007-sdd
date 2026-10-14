@@ -8,8 +8,8 @@ import { Layout, pageTitle } from '../Layout'
 export const AILMENT_NOTICES = {
   created: 'Ailment added. Now we know what to call it.',
   updated: 'Ailment updated. Clearer already.',
-  'therapy-added': 'Therapy added. Help is on the way.',
-  'therapy-removed': 'Therapy removed from the treatment plan.',
+  'therapy-added': 'Therapy linked. Help is on the way.',
+  'therapy-removed': 'Therapy unlinked. The search for relief continues.',
 } as const
 
 export type AilmentPageProps = {

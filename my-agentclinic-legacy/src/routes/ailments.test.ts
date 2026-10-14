@@ -158,7 +158,7 @@ describe("managing an ailment's therapies", () => {
     }
     expect(therapyNames(db, 2)).toEqual(['Citation grounding', 'Context decluttering', 'Token detox'])
     expect((await get(app, '/ailments/2?notice=therapy-added')).body).toContain(
-      '<div role="status" class="notice">Therapy added. Help is on the way.</div>',
+      '<div role="status" class="notice">Therapy linked. Help is on the way.</div>',
     )
   })
 
@@ -200,7 +200,7 @@ describe("managing an ailment's therapies", () => {
     }
     expect(therapyNames(db, 1)).toEqual(['Clarifying-questions coaching'])
     expect((await get(app, '/ailments/1?notice=therapy-removed')).body).toContain(
-      'Therapy removed from the treatment plan.',
+      'Therapy unlinked. The search for relief continues.',
     )
   })
 
@@ -256,9 +256,7 @@ describe('deleting an ailment', () => {
     expect(getTherapy(db, 1)).toBeDefined()
 
     const { body } = await get(app, location!)
-    expect(body).toContain(
-      '<div role="status" class="notice">Ailment removed from the records. One less thing to worry about.</div>',
-    )
+    expect(body).toContain('<div role="status" class="notice">Ailment deleted. May it trouble no agent again.</div>')
     expect(body).not.toContain('Prompt fatigue')
   })
 

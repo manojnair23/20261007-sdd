@@ -170,7 +170,7 @@ describe('deleting a therapy', () => {
     expect(listTherapiesForAilment(db, 1).map((t) => t.name)).toEqual(['Clarifying-questions coaching'])
 
     const { body } = await get(app, location!)
-    expect(body).toContain('<div role="status" class="notice">Therapy retired. Thank you for your service.</div>')
+    expect(body).toContain('<div role="status" class="notice">Therapy deleted. Thank you for your service.</div>')
     expect(body).not.toContain('Token detox')
     expect((await get(app, '/appointments/new')).body).not.toContain('Token detox')
   })
