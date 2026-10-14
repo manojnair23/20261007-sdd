@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getTherapy, listTherapies } from '../db/therapies'
+import { getTherapy, listTherapies, listTherapiesForAilment } from '../db/therapies'
 import { get, post, testApp } from '../test/testApp'
 
 // Staff management of therapies. The read-only therapies page is tested in catalog.test.ts.
@@ -126,5 +126,77 @@ describe('editing a therapy', () => {
     const { app } = testApp()
     expect((await get(app, '/therapies/999/edit')).status).toBe(404)
     expect((await post(app, '/therapies/999/edit', newTherapy)).status).toBe(404)
+  })
+})
+
+describe('deleting a therapy', () => {
+  // In the seed, therapies 1 and 2 have no appointments. Therapy 4 has an upcoming one,
+  // 5 only a past one, and 6 only a cancelled one.
+
+  it('links to the confirmation page from each card, named for screen readers', async () => {
+    const { app } = testApp()
+    expect(card((await get(app, '/therapies')).body, 2)).toContain(
+      '<a href="/therapies/2/delete" role="button" class="secondary outline" aria-label="Delete Guided temperature reduction">Delete</a>',
+    )
+  })
+
+  it('asks first, saying which ailment links go with it', async () => {
+    const { app, db } = testApp()
+    const { status, body } = await get(app, '/therapies/2/delete')
+    expect(status).toBe(200)
+    expect(body).toContain('<h1>Delete Guided temperature reduction?</h1>')
+    expect(body).toContain(
+      'This removes Guided temperature reduction from the clinic, along with its 2 ailment links. The ailments themselves stay.',
+    )
+    expect(body).toContain('<form method="post" action="/therapies/2/delete" class="actions">')
+    expect(body).toContain('<a href="/therapies" role="button" class="secondary outline">Keep it</a>')
+    expect(getTherapy(db, 2)).toBeDefined()
+  })
+
+  it('leaves out the links when the therapy has none', async () => {
+    const { app } = testApp()
+    await post(app, '/therapies/new', newTherapy)
+    expect((await get(app, '/therapies/7/delete')).body).toContain(
+      '<p>This removes Gradient descent walk from the clinic.</p>',
+    )
+  })
+
+  it('deletes the therapy and its ailment links, then lists therapies with a notice', async () => {
+    const { app, db } = testApp()
+    const { status, location } = await post(app, '/therapies/1/delete')
+    expect(status).toBe(303)
+    expect(location).toBe('/therapies?notice=deleted')
+    expect(getTherapy(db, 1)).toBeUndefined()
+    expect(listTherapiesForAilment(db, 1).map((t) => t.name)).toEqual(['Clarifying-questions coaching'])
+
+    const { body } = await get(app, location!)
+    expect(body).toContain('<div role="status" class="notice">Therapy retired. Thank you for your service.</div>')
+    expect(body).not.toContain('Token detox')
+    expect((await get(app, '/appointments/new')).body).not.toContain('Token detox')
+  })
+
+  it.each([
+    [4, 'Clarifying-questions coaching', 'upcoming'],
+    [5, 'Exponential-backoff meditation', 'past'],
+    [6, 'Citation grounding', 'cancelled'],
+  ])('keeps therapy %i (%s), which has a %s appointment, with a 409 before and after confirming', async (id, name) => {
+    const { app, db } = testApp()
+    for (const { status, body } of [
+      await get(app, `/therapies/${id}/delete`),
+      await post(app, `/therapies/${id}/delete`),
+    ]) {
+      expect(status).toBe(409)
+      expect(body).toContain(`<h1>${name} can&#39;t be deleted</h1>`)
+      expect(body).toContain(`${name} has 1 appointment on record`)
+      expect(body).toContain('<a href="/appointments">See the appointments</a>')
+      expect(body).not.toContain('<form method="post"')
+    }
+    expect(getTherapy(db, id)).toBeDefined()
+  })
+
+  it('returns 404 for an unknown therapy', async () => {
+    const { app } = testApp()
+    expect((await get(app, '/therapies/999/delete')).status).toBe(404)
+    expect((await post(app, '/therapies/999/delete')).status).toBe(404)
   })
 })

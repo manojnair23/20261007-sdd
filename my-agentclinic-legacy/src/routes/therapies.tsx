@@ -1,9 +1,19 @@
-import { Hono } from 'hono'
-import { createTherapy, getTherapy, listTherapies, updateTherapy, type Therapy } from '../db/therapies'
+import { Hono, type Context } from 'hono'
+import {
+  countAilmentLinksForTherapy,
+  countAppointmentsForTherapy,
+  createTherapy,
+  deleteTherapy,
+  getTherapy,
+  listTherapies,
+  updateTherapy,
+  type Therapy,
+} from '../db/therapies'
 import { ID, nowSlot, type AppDeps } from '../deps'
 import { validateTherapy } from '../therapies/validate'
 import { formText } from '../validation'
-import { noticeKey } from '../views/components'
+import { countOf, noticeKey } from '../views/components'
+import { CannotDeletePage, ConfirmDeletePage } from '../views/DeletePages'
 import { THERAPIES_NOTICES, TherapiesPage } from '../views/therapies/TherapiesPage'
 import { TherapyForm } from '../views/therapies/TherapyForm'
 
@@ -75,6 +85,47 @@ export function therapyRoutes(deps: AppDeps) {
 
     updateTherapy(db, therapy.id, result.value)
     return c.redirect('/therapies?notice=updated', 303)
+  })
+
+  const cannotDelete = (c: Context, therapy: Therapy) =>
+    c.html(
+      <CannotDeletePage name={therapy.name} path={`/therapies/${therapy.id}/delete`}>
+        <p>
+          {therapy.name} has {countOf(countAppointmentsForTherapy(db, therapy.id), 'appointment')} on record, counting
+          upcoming, past, and cancelled ones. Therapies with appointments stay, so the clinic's history still makes
+          sense.
+        </p>
+        <p>
+          <a href="/appointments">See the appointments</a> or <a href="/therapies">go back to the therapies</a>.
+        </p>
+      </CannotDeletePage>,
+      409,
+    )
+
+  routes.get(`/${ID}/delete`, (c) => {
+    const therapy = getTherapy(db, Number(c.req.param('id')))
+    if (!therapy) return c.notFound()
+    if (countAppointmentsForTherapy(db, therapy.id) > 0) return cannotDelete(c, therapy)
+
+    const ailments = countAilmentLinksForTherapy(db, therapy.id)
+    return c.html(
+      <ConfirmDeletePage name={therapy.name} action={`/therapies/${therapy.id}/delete`} cancelHref="/therapies">
+        <p>
+          This removes {therapy.name} from the clinic
+          {ailments > 0 ? `, along with its ${countOf(ailments, 'ailment link')}. The ailments themselves stay.` : '.'}
+        </p>
+      </ConfirmDeletePage>,
+    )
+  })
+
+  routes.post(`/${ID}/delete`, (c) => {
+    const therapy = getTherapy(db, Number(c.req.param('id')))
+    if (!therapy) return c.notFound()
+
+    const outcome = deleteTherapy(db, therapy.id)
+    if (outcome === 'not-found') return c.notFound()
+    if (outcome === 'has-appointments') return cannotDelete(c, therapy)
+    return c.redirect('/therapies?notice=deleted', 303)
   })
 
   return routes

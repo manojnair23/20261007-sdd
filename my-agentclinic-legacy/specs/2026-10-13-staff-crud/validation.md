@@ -20,7 +20,7 @@ The phase is done when every box below is ticked. Tick each slice's boxes as it'
 - [x] **6.8** Linking and unlinking therapies works and is idempotent, and `/therapies` shows the change.
 - [x] **6.9** Deleting an ailment removes it and its links to agents and therapies. It's never blocked.
 - [x] **6.10** Creating and editing a therapy: the duration must be a whole number from 1 to 480. A therapy with upcoming appointments can't change its duration, but can change its name and description.
-- [ ] **6.11** Deleting a therapy with no appointments works. One with any appointment returns 409 and the database doesn't change.
+- [x] **6.11** Deleting a therapy with no appointments works. One with any appointment returns 409 and the database doesn't change.
 - [ ] **6.12** The staff dashboard links to every "add" page and every list. An unknown `?notice=` shows nothing.
 - [ ] **6.13** The accessibility sweep includes every new page, every 400 form, both 409 pages, and the 403 page. The link crawler reaches every new page. `db:seed --force` removes staff-created records.
 

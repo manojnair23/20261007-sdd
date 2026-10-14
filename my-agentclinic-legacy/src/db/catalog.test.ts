@@ -23,8 +23,11 @@ import {
   updateAilment,
 } from './ailments'
 import {
+  countAilmentLinksForTherapy,
+  countAppointmentsForTherapy,
   countUpcomingAppointmentsForTherapy,
   createTherapy,
+  deleteTherapy,
   getTherapy,
   linkTherapy,
   listRecommendedTherapies,
@@ -215,6 +218,22 @@ describe('therapies', () => {
     expect([1, 2, 3, 4, 5, 6].map((id) => countUpcomingAppointmentsForTherapy(db, id, now))).toEqual([0, 0, 1, 1, 0, 0])
     // Once the appointment for therapy 4 (tomorrow at 10:00) has started, it no longer counts.
     expect(countUpcomingAppointmentsForTherapy(db, 4, '2026-10-13T10:00')).toBe(0)
+  })
+
+  it('counts every appointment and ailment link a therapy has', () => {
+    expect([1, 2, 3, 4, 5, 6].map((id) => countAppointmentsForTherapy(db, id))).toEqual([0, 0, 1, 1, 1, 1])
+    expect([1, 2, 3, 4, 5, 6].map((id) => countAilmentLinksForTherapy(db, id))).toEqual([2, 2, 1, 2, 1, 1])
+  })
+
+  it('deletes a therapy without appointments, with its ailment links, and keeps the rest', () => {
+    const { db } = testApp()
+    expect(deleteTherapy(db, 1)).toBe('ok')
+    expect(getTherapy(db, 1)).toBeUndefined()
+    expect(countAilmentLinksForTherapy(db, 1)).toBe(0)
+
+    expect(deleteTherapy(db, 5)).toBe('has-appointments')
+    expect(getTherapy(db, 5)).toBeDefined()
+    expect(deleteTherapy(db, 999)).toBe('not-found')
   })
 
   it('lists the therapies not linked to an ailment', () => {

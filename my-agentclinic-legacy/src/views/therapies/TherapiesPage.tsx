@@ -6,6 +6,7 @@ import { Layout, pageTitle } from '../Layout'
 export const THERAPIES_NOTICES = {
   created: 'Therapy added. The treatment rooms are ready.',
   updated: 'Therapy updated. Same care, fresh details.',
+  deleted: 'Therapy retired. Thank you for your service.',
 } as const
 
 type TherapiesPageProps = {
@@ -57,6 +58,14 @@ export const TherapiesPage = ({ therapies, notice }: TherapiesPageProps) => (
                   aria-label={`Edit ${therapy.name}`}
                 >
                   Edit
+                </a>
+                <a
+                  href={`/therapies/${therapy.id}/delete`}
+                  role="button"
+                  class="secondary outline"
+                  aria-label={`Delete ${therapy.name}`}
+                >
+                  Delete
                 </a>
               </div>
             </article>

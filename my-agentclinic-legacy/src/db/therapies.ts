@@ -1,4 +1,5 @@
 import type { Slot } from '../time'
+import type { DeleteResult } from './agents'
 import type { Db } from './connection'
 
 export type Therapy = {
@@ -120,4 +121,27 @@ export function countUpcomingAppointmentsForTherapy(db: Db, id: number, now: Slo
     .prepare("SELECT count(*) FROM appointments WHERE therapy_id = ? AND status = 'scheduled' AND starts_at > ?")
     .pluck()
     .get(id, now) as number
+}
+
+/** How many appointments of any status use the therapy. */
+export function countAppointmentsForTherapy(db: Db, id: number): number {
+  return db.prepare('SELECT count(*) FROM appointments WHERE therapy_id = ?').pluck().get(id) as number
+}
+
+/**
+ * Deletes a therapy and its ailment links. Therapies with any appointment (upcoming, past, or
+ * cancelled) are kept, so the schedule's history stays whole. Checks and deletes in one transaction.
+ */
+export function deleteTherapy(db: Db, id: number): DeleteResult {
+  return db.transaction((): DeleteResult => {
+    if (!getTherapy(db, id)) return 'not-found'
+    if (countAppointmentsForTherapy(db, id) > 0) return 'has-appointments'
+    db.prepare('DELETE FROM therapies WHERE id = ?').run(id)
+    return 'ok'
+  })()
+}
+
+/** How many ailments the therapy is linked to. */
+export function countAilmentLinksForTherapy(db: Db, id: number): number {
+  return db.prepare('SELECT count(*) FROM ailment_therapies WHERE therapy_id = ?').pluck().get(id) as number
 }
