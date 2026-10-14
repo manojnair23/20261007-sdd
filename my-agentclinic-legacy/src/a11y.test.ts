@@ -41,6 +41,7 @@ const PAGES: [string, number][] = [
 // check refuses. None of them change the database, so they can share one app.
 const POSTS: [string, string, number, Record<string, string>?][] = [
   ['/appointments/new', 'invalid', 400, { agent: '', therapy: '', startsAt: '' }],
+  ['/appointments/1/reschedule', 'invalid', 400, { startsAt: 'nonsense' }],
   ['/agents/new', 'invalid', 400],
   ['/agents/1/edit', 'invalid', 400],
   ['/agents/1/ailments', 'invalid', 400],
@@ -105,5 +106,25 @@ describe('accessibility baseline on every page', async () => {
     for (const [button] of body.matchAll(/<button\b[^>]*>([^<]*)<\/button>/g)) {
       expect(button).toMatch(/aria-label="[^"]+"|>[^<\s][^<]*<\/button>/)
     }
+  })
+})
+
+// Keeps the lists above complete: every page the app registers must be swept.
+describe('the accessibility sweep covers every route', () => {
+  /** A route pattern like /agents/:id{[0-9]+}/edit as an anchored regex. */
+  const matcher = (pattern: string) =>
+    new RegExp(`^${pattern.replace(/:\w+\{([^}]+)\}/g, '($1)').replace(/:\w+/g, '[^/]+')}$`)
+  const routes = (method: string) => app.routes.filter((r) => r.method === method && r.path !== '/*').map((r) => r.path)
+  const pagePaths = PAGES.map(([path]) => path.split('?')[0])
+  const invalidPosts = POSTS.filter(([, label]) => label === 'invalid').map(([path]) => path)
+  // POSTs that never re-render a form: they redirect, or answer 404 or 409.
+  const NO_FORM = /\/(remove|delete|cancel)$/
+
+  it.each(routes('GET').filter((path) => path !== '/pico.min.css'))('GET %s has a page in PAGES', (pattern) => {
+    expect(pagePaths.some((path) => matcher(pattern).test(path))).toBe(true)
+  })
+
+  it.each(routes('POST').filter((path) => !NO_FORM.test(path)))('POST %s has an invalid form in POSTS', (pattern) => {
+    expect(invalidPosts.some((path) => matcher(pattern).test(path))).toBe(true)
   })
 })

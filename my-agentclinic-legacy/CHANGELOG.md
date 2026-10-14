@@ -2,6 +2,16 @@
 
 All notable changes to this project, newest first.
 
+## 2026-10-14
+- Build Phase 6 (Staff CRUD): staff add, edit, and delete agents, ailments, and therapies, assign ailments to agents, and link therapies to ailments, all as plain HTML forms with POST-Redirect-GET, an error summary, and a notice after every change
+- Protect every form post with Hono's `csrf()` origin check; a cross-site post gets a friendly 403 page
+- Share the booking form's field and validation pattern (`src/views/forms.tsx`, `src/validation.ts`); the booking form's HTML is unchanged
+- Keep agents and therapies that have any appointment (409 with an explanation), and lock a therapy's duration while it has upcoming appointments
+- Add "Manage the catalog" to the staff dashboard, and give every notice the same "<Record> <verb>. <kind line>." shape, checked by a test
+- Fix `?notice=toString` (and other inherited names) showing an empty notice box
+- Extend the accessibility sweep to every page and form error state, with a test that fails if a new route isn't swept (it found the reschedule form's error state missing); the link crawler reaches every staff page; reseeding removes staff changes
+- Write the Phase 6 requirements, plan, and validation specs; skip `.claude/` in Prettier
+
 ## 2026-10-13
 - Build Phase 5 (Linting and formatting): ESLint with `typescript-eslint` (`npm run lint`, `npm run lint:fix`), Prettier matching the existing style (`npm run format`, `npm run format:check`), and `npm run validate` now runs typecheck → lint → test
 - Fix the one ESLint finding: write the narrow no-break space in `src/time.ts` as `\u202f` instead of an invisible literal

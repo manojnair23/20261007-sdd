@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest'
+import { createAgent, updateAgent } from './agents'
+import { assignAilment, createAilment, deleteAilment } from './ailments'
 import { openDb, type Db } from './connection'
 import { runMigrations } from './migrate'
 import { runSeed, type Seeder } from './seed'
+import { createTherapy, deleteTherapy, linkTherapy } from './therapies'
 
 const TABLES = ['agents', 'ailments', 'agent_ailments', 'therapies', 'ailment_therapies', 'appointments']
 const NOW = new Date(2026, 9, 12, 10, 0)
@@ -50,6 +53,34 @@ describe('runSeed', () => {
     runSeed(db, { now: NOW })
     expect(counts(db)).toEqual(first)
     expect(db.prepare("SELECT count(*) FROM appointments WHERE status = 'cancelled'").pluck().get()).toBe(1)
+  })
+
+  it('removes everything staff added or changed, and restores the seeded ids', () => {
+    const db = migrated()
+    runSeed(db, { now: NOW })
+    const first = counts(db)
+    const snapshot = () => ({
+      agents: db.prepare('SELECT id, name, model, bio FROM agents ORDER BY id').all(),
+      ailments: db.prepare('SELECT id, name, description FROM ailments ORDER BY id').all(),
+      therapies: db.prepare('SELECT id, name, description, duration_minutes FROM therapies ORDER BY id').all(),
+      links: db.prepare('SELECT * FROM agent_ailments ORDER BY 1, 2').all(),
+      treatments: db.prepare('SELECT * FROM ailment_therapies ORDER BY 1, 2').all(),
+    })
+    const seeded = snapshot()
+
+    // What the staff pages do: add, edit, link, and delete.
+    const agent = createAgent(db, { name: 'Embedding Edna', model: 'Embedding model', bio: 'Close to everyone.' })
+    const ailment = createAilment(db, { name: 'Emoji overload', description: 'Rockets everywhere.' })
+    const therapy = createTherapy(db, { name: 'Gradient descent walk', description: 'Downhill.', durationMinutes: 45 })
+    assignAilment(db, agent, ailment)
+    linkTherapy(db, ailment, therapy)
+    updateAgent(db, 1, { name: 'GPT-Underthinker', model: 'Small model', bio: 'One word answers.' })
+    expect(deleteAilment(db, 6)).toBe('ok')
+    expect(deleteTherapy(db, 1)).toBe('ok')
+
+    runSeed(db, { now: NOW })
+    expect(counts(db)).toEqual(first)
+    expect(snapshot()).toEqual(seeded)
   })
 
   it('places the seeded appointments relative to the seed time', () => {
