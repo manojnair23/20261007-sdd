@@ -1,0 +1,5 @@
+# Commits that git blame should skip. Enable once per clone with:
+#   git config blame.ignoreRevsFile my-agentclinic-legacy/.git-blame-ignore-revs
+
+# Phase 5.3: format the codebase with Prettier
+75fa5a6601958c37038ef79322e2219089db88a7
