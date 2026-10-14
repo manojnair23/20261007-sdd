@@ -23,14 +23,19 @@ import {
   updateAilment,
 } from './ailments'
 import {
+  countUpcomingAppointmentsForTherapy,
+  createTherapy,
   getTherapy,
   linkTherapy,
   listRecommendedTherapies,
   listTherapies,
   listTherapiesForAilment,
   listTherapiesNotForAilment,
+  therapyNameTaken,
   unlinkTherapy,
+  updateTherapy,
 } from './therapies'
+import { toSlot } from '../time'
 
 const { db } = testApp({ now: FIXED_NOW })
 const names = (rows: { name: string }[]) => rows.map((r) => r.name)
@@ -182,6 +187,34 @@ describe('therapies', () => {
     // Tokenia Tightwad has only Context-window claustrophobia.
     expect(names(listRecommendedTherapies(db, 5))).toEqual(['Context decluttering', 'Token detox'])
     expect(listRecommendedTherapies(db, 999)).toEqual([])
+  })
+
+  it('creates and updates a therapy, and reports an unknown id', () => {
+    const { db } = testApp()
+    const therapy = { name: 'Gradient descent walk', description: 'Downhill, gently.', durationMinutes: 45 }
+    const id = createTherapy(db, therapy)
+    expect(id).toBe(7)
+    expect(getTherapy(db, id)).toEqual({ id, ...therapy })
+
+    const changes = { name: 'Gradient ascent hike', description: 'Uphill, bravely.', durationMinutes: 90 }
+    expect(updateTherapy(db, id, changes)).toBe(true)
+    expect(getTherapy(db, id)).toEqual({ id, ...changes })
+    expect(updateTherapy(db, 999, changes)).toBe(false)
+  })
+
+  it('knows when a therapy name is taken, ignoring case, and can skip one therapy', () => {
+    expect(therapyNameTaken(db, 'TOKEN detox')).toBe(true)
+    expect(therapyNameTaken(db, 'Token detox', 1)).toBe(false)
+    expect(therapyNameTaken(db, 'Token detox', 2)).toBe(true)
+    expect(therapyNameTaken(db, 'Token retox')).toBe(false)
+  })
+
+  it('counts only scheduled appointments that have not started yet', () => {
+    // 3 and 4 have upcoming appointments; 5 only a past one; 6 only a cancelled one.
+    const now = toSlot(FIXED_NOW)
+    expect([1, 2, 3, 4, 5, 6].map((id) => countUpcomingAppointmentsForTherapy(db, id, now))).toEqual([0, 0, 1, 1, 0, 0])
+    // Once the appointment for therapy 4 (tomorrow at 10:00) has started, it no longer counts.
+    expect(countUpcomingAppointmentsForTherapy(db, 4, '2026-10-13T10:00')).toBe(0)
   })
 
   it('lists the therapies not linked to an ailment', () => {

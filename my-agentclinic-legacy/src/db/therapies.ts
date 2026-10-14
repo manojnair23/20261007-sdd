@@ -1,3 +1,4 @@
+import type { Slot } from '../time'
 import type { Db } from './connection'
 
 export type Therapy = {
@@ -78,4 +79,45 @@ export function linkTherapy(db: Db, ailmentId: number, therapyId: number): void 
 /** Removes the link between an ailment and a therapy. Unlinking a pair that isn't linked changes nothing. */
 export function unlinkTherapy(db: Db, ailmentId: number, therapyId: number): void {
   db.prepare('DELETE FROM ailment_therapies WHERE ailment_id = ? AND therapy_id = ?').run(ailmentId, therapyId)
+}
+
+/** A therapy's editable fields: everything except the id. */
+export type TherapyInput = Omit<Therapy, 'id'>
+
+/** Adds a therapy and returns the new id. */
+export function createTherapy(db: Db, therapy: TherapyInput): number {
+  const { lastInsertRowid } = db
+    .prepare(
+      `INSERT INTO therapies (name, description, duration_minutes)
+       VALUES (@name, @description, @durationMinutes)`,
+    )
+    .run(therapy)
+  return Number(lastInsertRowid)
+}
+
+/** Saves a therapy's fields. Returns false when there's no therapy with that id. */
+export function updateTherapy(db: Db, id: number, therapy: TherapyInput): boolean {
+  const { changes } = db
+    .prepare(
+      `UPDATE therapies SET name = @name, description = @description, duration_minutes = @durationMinutes
+       WHERE id = @id`,
+    )
+    .run({ ...therapy, id })
+  return changes > 0
+}
+
+/** Whether another therapy already uses this name, ignoring case. `ignoreId` skips the therapy being edited. */
+export function therapyNameTaken(db: Db, name: string, ignoreId?: number): boolean {
+  const row = db
+    .prepare('SELECT 1 FROM therapies WHERE lower(name) = lower(?) AND id IS NOT ?')
+    .get(name, ignoreId ?? null)
+  return row !== undefined
+}
+
+/** Scheduled appointments for the therapy that haven't started yet (the same rule as `isChangeable`). */
+export function countUpcomingAppointmentsForTherapy(db: Db, id: number, now: Slot): number {
+  return db
+    .prepare("SELECT count(*) FROM appointments WHERE therapy_id = ? AND status = 'scheduled' AND starts_at > ?")
+    .pluck()
+    .get(id, now) as number
 }

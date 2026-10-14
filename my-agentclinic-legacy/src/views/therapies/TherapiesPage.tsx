@@ -1,17 +1,31 @@
 import type { TherapyWithAilments } from '../../db/therapies'
-import { EmptyState, PageHeader } from '../components'
+import { EmptyState, Notice, PageHeader } from '../components'
 import { Layout, pageTitle } from '../Layout'
+
+// Therapies have no page of their own, so every therapy notice shows here.
+export const THERAPIES_NOTICES = {
+  created: 'Therapy added. The treatment rooms are ready.',
+  updated: 'Therapy updated. Same care, fresh details.',
+} as const
 
 type TherapiesPageProps = {
   therapies: TherapyWithAilments[]
+  notice?: keyof typeof THERAPIES_NOTICES
 }
 
-export const TherapiesPage = ({ therapies }: TherapiesPageProps) => (
+export const TherapiesPage = ({ therapies, notice }: TherapiesPageProps) => (
   <Layout title={pageTitle('Therapies')} path="/therapies">
     <PageHeader title="Therapies" lead="Evidence-adjacent treatments for the modern agent." />
+    <Notice message={notice && THERAPIES_NOTICES[notice]} />
+    <p>
+      <a href="/therapies/new" role="button">
+        Add a therapy
+      </a>
+    </p>
     {therapies.length === 0 ? (
       <EmptyState>
-        No therapies on offer yet. Run <code>npm run db:seed</code> to open the treatment rooms.
+        No therapies on offer yet. <a href="/therapies/new">Add the first one</a>, or run <code>npm run db:seed</code>{' '}
+        to open the treatment rooms.
       </EmptyState>
     ) : (
       <ul class="card-grid" aria-label="Therapies">
@@ -35,6 +49,16 @@ export const TherapiesPage = ({ therapies }: TherapiesPageProps) => (
               <a href={`/appointments/new?therapy=${therapy.id}`} aria-label={`Book ${therapy.name}`}>
                 Book this therapy
               </a>
+              <div class="actions card-actions">
+                <a
+                  href={`/therapies/${therapy.id}/edit`}
+                  role="button"
+                  class="secondary outline"
+                  aria-label={`Edit ${therapy.name}`}
+                >
+                  Edit
+                </a>
+              </div>
             </article>
           </li>
         ))}

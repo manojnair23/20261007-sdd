@@ -22,6 +22,9 @@ const PAGES: [string, number][] = [
   ['/ailments/1/delete', 200],
   ['/ailments?notice=deleted', 200],
   ['/therapies', 200],
+  ['/therapies?notice=created', 200],
+  ['/therapies/new', 200],
+  ['/therapies/1/edit', 200],
   ['/appointments', 200],
   ['/appointments/new', 200],
   ['/appointments/new?agent=1', 200],
@@ -41,6 +44,13 @@ const POSTS: [string, string, number, Record<string, string>?][] = [
   ['/ailments/new', 'invalid', 400],
   ['/ailments/1/edit', 'invalid', 400],
   ['/ailments/1/therapies', 'invalid', 400],
+  ['/therapies/new', 'invalid', 400],
+  [
+    '/therapies/4/edit',
+    'invalid',
+    400,
+    { name: 'Clarifying-questions coaching', description: 'x', durationMinutes: '60' },
+  ],
   ['/appointments/new', 'cross-origin', 403, { Origin: 'https://evil.example' }],
 ]
 
